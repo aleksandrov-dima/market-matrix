@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог Store</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/6.4.0/css/tabulator_simple.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.5.3/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/6.4.0/js/tabulator.min.js"></script>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --text:#1d2330; --muted:#6b7385; --border:#dde1e8;
+  --accent:#2f6fde; --accent-soft:#e3ecfc; --mark:#ffe58a; --mark-text:#1d2330; --row-alt:#fafbfc; --row-hover:#eef3fd;
+  --danger:#c2413b; --ok:#2c8a4b; --star:#d99a00; --shadow:0 4px 18px rgba(20,30,50,.14);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15181e; --panel:#1c2028; --panel2:#232833; --text:#e3e7ee; --muted:#8f98a8; --border:#2e3440;
+    --accent:#6f9dff; --accent-soft:#233252; --mark:#7a6212; --mark-text:#fff4c9; --row-alt:#1f232c; --row-hover:#26304a;
+    --danger:#ef6b64; --ok:#5cc07c; --star:#f0b93a; --shadow:0 4px 18px rgba(0,0,0,.5);
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+input[type=text],input[type=number],input[type=date],input[type=search],select{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px 6px;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+header{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap}
+header h1{font-size:15px;margin:0 8px 0 0;font-weight:600;white-space:nowrap}
+#status{color:var(--muted);white-space:nowrap}
+#found{font-weight:600}
+.spacer{flex:1}
+#progress{width:160px;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;display:none}
+#progress>div{height:100%;width:0;background:var(--accent);transition:width .1s}
+.searchbar{display:flex;gap:8px;align-items:center;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+#q{flex:1;font-size:14px;padding:6px 10px}
+.help{position:relative}
+.help>button{width:28px;height:28px;border-radius:50%;padding:0;font-weight:700}
+.help .pop{display:none;position:absolute;right:0;top:34px;z-index:50;background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:10px 12px;width:380px;max-width:calc(100vw - 32px)}
+.help:hover .pop,.help:focus-within .pop{display:block}
+.pop table{border-collapse:collapse;width:100%}
+.pop td{padding:3px 4px;vertical-align:top}
+.pop code{background:var(--panel2);padding:1px 4px;border-radius:4px;white-space:nowrap}
+main{flex:1;display:flex;min-height:0}
+aside{width:270px;flex:none;overflow-y:auto;background:var(--panel);border-right:1px solid var(--border);padding:10px 12px 20px}
+aside h3{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px;font-weight:600;display:flex;align-items:center;gap:6px}
+aside h3:first-child{margin-top:2px}
+aside h3 .lnk{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer;color:var(--accent)}
+.row2{display:flex;gap:6px;align-items:center}
+.row2 input{width:100%}
+.row2 span{color:var(--muted)}
+.seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:3px 4px;cursor:pointer;border-right:1px solid var(--border);white-space:nowrap}
+.seg label:last-child{border-right:0}
+.seg input{display:none}
+.seg input:checked+span{color:var(--accent);font-weight:600}
+.seg label:has(input:checked){background:var(--accent-soft)}
+.chk{display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer}
+.quick{display:flex;gap:4px;margin-top:6px}
+.quick button{flex:1;padding:2px 4px;font-size:12px}
+#catFilter{width:100%;margin-bottom:4px}
+#cats{max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:2px 0}
+#cats label{display:flex;align-items:center;gap:6px;padding:2px 8px;cursor:pointer}
+#cats label:hover{background:var(--row-hover)}
+#cats label .n{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+#cats label.zero{opacity:.45}
+#cats label.sel{font-weight:600}
+/* рынки / цены по странам */
+#market{max-width:230px}
+.dd button.wide{width:100%;margin:2px 0;text-align:left}
+.dd .note{font-size:12px;color:var(--muted);margin-top:4px;white-space:normal;max-width:300px}
+#mnote{flex:none;padding:7px 16px;border-bottom:1px solid var(--border);background:var(--panel2);display:flex;gap:10px;align-items:flex-start}
+#mnote[hidden]{display:none}
+#mnote.warn{background:color-mix(in srgb,var(--mark) 35%,var(--panel))}
+#mnote .txt{flex:1}
+#mnote code,.dpanel code{background:var(--panel);border:1px solid var(--border);padding:0 4px;border-radius:4px}
+#mnote button{padding:0 8px;line-height:20px}
+.ok{color:var(--ok)}
+.bad{color:var(--danger)}
+.sale{color:var(--danger);font-weight:600}
+s.dim{margin-left:4px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.tabulator-row.cur{box-shadow:inset 3px 0 0 var(--accent)}
+.tabulator-row{cursor:default}
+/* панель деталей */
+#detail{width:400px;flex:none;overflow-y:auto;background:var(--panel);border-left:1px solid var(--border);padding:10px 14px 24px}
+#detail[hidden]{display:none}
+.dhead{display:flex;gap:10px;align-items:flex-start}
+.dhead img,.dhead .ph{width:56px;height:56px;border-radius:10px;object-fit:contain;background:var(--panel2);flex:none}
+.dhead .tt{flex:1;min-width:0}
+.dhead .tt b{display:block;font-size:15px;line-height:1.3}
+#dclose{width:28px;height:28px;padding:0;font-size:16px;line-height:1;flex:none}
+.dpanel dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 10px;margin:10px 0}
+.dpanel dt{color:var(--muted)}
+.dpanel dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.dpanel h4{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px;font-weight:600;display:flex;gap:8px;align-items:center}
+.dpanel h4 label{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;display:flex;gap:4px;align-items:center;cursor:pointer}
+.ptab{width:100%;border-collapse:collapse;font-size:12px}
+.ptab th{text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);padding:3px 4px;position:sticky;top:-10px;background:var(--panel)}
+.ptab td{padding:3px 4px;border-bottom:1px solid var(--border);white-space:nowrap}
+.ptab td.r,.ptab th.r{text-align:right}
+.ptab tr.go{cursor:pointer}
+.ptab tr.go:hover td{background:var(--row-hover)}
+.ptab tr.curm td{background:var(--accent-soft);font-weight:600}
+.ptab td.cn{white-space:normal}
+.tablewrap{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+#table{flex:1;min-height:0}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px}
+#empty .box{border:2px dashed var(--border);border-radius:14px;padding:40px 48px;text-align:center;color:var(--muted);max-width:520px}
+#empty .box b{display:block;color:var(--text);font-size:16px;margin-bottom:8px}
+#empty .box.err{border-color:var(--danger);color:var(--text)}
+#empty .box.err b{color:var(--danger)}
+#empty code{background:var(--panel2);padding:1px 5px;border-radius:4px}
+#empty .box button{margin-top:14px}
+.menu{position:relative}
+.menu .dd{display:none;position:absolute;right:0;top:32px;background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:6px 10px;z-index:60;min-width:220px}
+.menu.open .dd{display:block}
+.dd label{display:flex;gap:6px;align-items:center;padding:2px 0;cursor:pointer;white-space:nowrap}
+.dd .sep{border-top:1px solid var(--border);margin:6px 0}
+mark{background:var(--mark);color:var(--mark-text);border-radius:2px;padding:0 1px}
+/* table cells */
+.logo{width:32px;height:32px;border-radius:6px;object-fit:contain;background:var(--panel2);display:block}
+.logo.broken{visibility:hidden}
+.t1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.t2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:12px}
+.dim{color:var(--muted)}
+.star{color:var(--star)}
+.ico{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;vertical-align:middle}
+.ico svg{width:16px;height:16px;fill:currentColor}
+/* Tabulator theme overrides */
+.tabulator{background:var(--panel);border:0;font-size:13px;color:var(--text)}
+.tabulator .tabulator-header{background:var(--panel2);border-bottom:1px solid var(--border);color:var(--text);font-weight:600}
+.tabulator .tabulator-header .tabulator-col{background:var(--panel2);border-right:1px solid var(--border)}
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover{background:var(--row-hover)}
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content{padding:6px 4px 6px 8px}
+.tabulator .tabulator-header{font-size:12px}
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title{padding-right:14px}
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter{right:2px}
+.tabulator .tabulator-tableholder{background:var(--panel)}
+.tabulator .tabulator-tableholder .tabulator-table{background:var(--panel);color:var(--text)}
+.tabulator-row{background:var(--panel);border-bottom:1px solid var(--border)}
+.tabulator-row.tabulator-row-even{background:var(--row-alt)}
+.tabulator-row.tabulator-selectable:hover,.tabulator-row:hover{background:var(--row-hover)!important}
+.tabulator-row .tabulator-cell{border-right:0;padding:6px 8px;height:46px;line-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabulator-row .tabulator-cell.stack{display:inline-flex;flex-direction:column;justify-content:center;line-height:1.35}
+.tabulator-row .tabulator-cell.tabulator-row-header{align-items:center}
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter .tabulator-arrow{border-bottom-color:var(--muted)}
+.tabulator .tabulator-header .tabulator-col[aria-sort=ascending] .tabulator-col-content .tabulator-col-sorter .tabulator-arrow{border-bottom-color:var(--accent)}
+.tabulator .tabulator-header .tabulator-col[aria-sort=descending] .tabulator-col-content .tabulator-col-sorter .tabulator-arrow{border-top-color:var(--accent)}
+.tabulator .tabulator-placeholder .tabulator-placeholder-contents{color:var(--muted);font-size:14px;font-weight:400}
+.tabulator-tooltip{background:var(--panel);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);max-width:480px}
+.num{font-variant-numeric:tabular-nums}
+@media (max-width:820px){
+  main{flex-direction:column}
+  aside{width:auto;max-height:38vh;border-right:0;border-bottom:1px solid var(--border)}
+  header,.searchbar{padding-left:16px;padding-right:16px}
+  #scope{max-width:120px}
+  #detail{position:fixed;inset:0;width:auto;z-index:80;border-left:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Каталог Store</h1>
+  <select id="market" title="Страна (рынок) Store: цены, доступность и ссылка на карточку"></select>
+  <div class="menu" id="pricesMenu"><button id="pricesBtn">Рынки ▾</button><div class="dd">
+    <button class="wide" id="mRefresh">Обновить список рынков</button>
+    <div class="note" id="pInfo">Список рынков загружается…</div>
+  </div></div>
+  <div id="progress"><div></div></div>
+  <span id="status">Загрузка…</span>
+  <span class="spacer"></span>
+  <span id="foundWrap" hidden>найдено <span id="found" class="num">0</span> из <span id="total" class="num">0</span></span>
+  <button id="resetBtn" disabled>Сбросить</button>
+  <div class="menu" id="colsMenu"><button id="colsBtn" disabled>Колонки ▾</button><div class="dd" id="colsDd"></div></div>
+  <div class="menu" id="expMenu"><button id="expBtn" disabled>Экспорт ▾</button><div class="dd">
+    <button id="expCur" style="width:100%;margin:2px 0">Текущие колонки</button>
+    <button id="expAll" style="width:100%;margin:2px 0">Все колонки</button>
+    <div class="dim" style="font-size:12px;margin-top:4px">Отфильтрованные строки в текущей сортировке, CSV UTF‑8 с BOM</div>
+  </div></div>
+</header>
+<div class="searchbar">
+  <input type="search" id="q" placeholder="Поиск: pdf -editor, publisher:adobe, &quot;точная фраза&quot;, word OR excel" autocomplete="off" spellcheck="false">
+  <select id="scope" title="Где искать слова без префикса">
+    <option value="all">везде</option>
+    <option value="title">только название</option>
+    <option value="td">название + описание</option>
+  </select>
+  <div class="help"><button type="button" aria-label="Синтаксис поиска">?</button>
+    <div class="pop">
+      <table>
+        <tr><td><code>pdf reader</code></td><td>оба слова (И)</td></tr>
+        <tr><td><code>pdf OR djvu</code></td><td>любое из слов (ИЛИ)</td></tr>
+        <tr><td><code>"pdf reader"</code></td><td>точная фраза</td></tr>
+        <tr><td><code>pdf -editor</code></td><td>исключить слово</td></tr>
+        <tr><td><code>title:notes</code></td><td>только в названии</td></tr>
+        <tr><td><code>publisher:adobe</code></td><td>в издателе</td></tr>
+        <tr><td><code>category:"developer tools"</code></td><td>в категориях</td></tr>
+        <tr><td><code>desc:markdown</code></td><td>в кратком описании</td></tr>
+        <tr><td><code>-publisher:"adobe inc."</code></td><td>исключить издателя</td></tr>
+      </table>
+      <div class="dim" style="margin-top:6px">Регистр не важен, ищется подстрока. Слова без префикса ищутся в области, выбранной слева от «?» (везде = название, издатель, категории, краткое описание).</div>
+    </div>
+  </div>
+</div>
+<main>
+  <aside id="side">
+    <h3>Категории <span class="lnk" id="catsClear">снять все</span></h3>
+    <input type="search" id="catFilter" placeholder="найти категорию">
+    <div id="cats"><div class="dim" style="padding:4px 8px">—</div></div>
+
+    <h3>Цена</h3>
+    <div class="seg" id="priceSeg">
+      <label><input type="radio" name="price" value="any" checked><span>любая</span></label>
+      <label><input type="radio" name="price" value="free"><span>бесплатно</span></label>
+      <label><input type="radio" name="price" value="paid"><span>платно</span></label>
+    </div>
+    <div class="row2" style="margin-top:6px"><input type="number" id="pmin" placeholder="от $" min="0" step="0.01"><span>–</span><input type="number" id="pmax" placeholder="до $" min="0" step="0.01"></div>
+
+    <h3>Доступность в стране</h3>
+    <label class="chk"><input type="checkbox" id="avail"> только доступные в выбранной стране</label>
+    <div class="row2" style="margin-top:6px"><span style="white-space:nowrap">доступно в рынках ≥</span><input type="number" id="nmmin" min="0" step="1" placeholder="N"></div>
+    <div class="hint" id="availHint"></div>
+
+    <h3>Оценки</h3>
+    <div class="row2"><span style="white-space:nowrap">рейтинг ≥</span><input type="number" id="rmin" min="0" max="5" step="0.1" placeholder="0–5"></div>
+    <div class="row2" style="margin-top:6px"><span style="white-space:nowrap">оценок ≥</span><input type="number" id="rcmin" min="0" step="1" placeholder="N"></div>
+    <label class="chk"><input type="checkbox" id="rated"> только с оценками</label>
+
+    <h3>Последнее обновление</h3>
+    <div class="row2"><input type="date" id="dfrom" title="с"><span>–</span><input type="date" id="dto" title="по"></div>
+    <div class="quick"><button data-days="30">30 дней</button><button data-days="365">1 год</button><button data-days="1095">3 года</button></div>
+
+    <h3>Длина описания</h3>
+    <div class="row2"><input type="number" id="dlmin" min="0" placeholder="от"><span>–</span><input type="number" id="dlmax" min="0" placeholder="до"></div>
+
+    <h3>Число языков</h3>
+    <div class="row2"><input type="number" id="lcmin" min="0" placeholder="от"><span>–</span><input type="number" id="lcmax" min="0" placeholder="до"></div>
+
+    <h3>Прочее</h3>
+    <label class="chk"><input type="checkbox" id="src"> есть исходный код</label>
+    <label class="chk"><input type="checkbox" id="site"> есть сайт</label>
+
+    <h3>Тип пакета</h3>
+    <div class="seg" id="kindSeg">
+      <label><input type="radio" name="kind" value="all" checked><span>все</span></label>
+      <label><input type="radio" name="kind" value="msix"><span>MSIX (9…)</span></label>
+      <label><input type="radio" name="kind" value="win32"><span>Win32 (XP…)</span></label>
+    </div>
+  </aside>
+  <div class="tablewrap">
+    <div id="mnote" hidden></div>
+    <div id="table"></div>
+    <div id="empty"><div class="box" id="emptyBox"><b>Загрузка каталога…</b>Данные берутся из msstore.db через локальный сервер <code>viewer_server.py</code>.</div></div>
+  </div>
+  <aside id="detail" hidden class="dpanel"></aside>
+</main>
+
+<!-- ===== Pure logic (no DOM). Extracted and unit-tested with node. ===== -->
+<script id="core">
+(function(global){
+"use strict";
+var CSV_COLUMNS = ["id","title","publisher","product_type","category","categories","price","display_price","rating","rating_count","last_update","release_date","short_description","description_length","languages_count","languages","logo_url","screenshot_url","website","has_source_code","source_code_url","size_bytes","platforms","store_url"];
+var FIELD_ALIASES = {title:"title", "название":"title", publisher:"publisher", pub:"publisher", "издатель":"publisher",
+  category:"category", cat:"category", "категория":"category", desc:"desc", description:"desc", "описание":"desc"};
+
+function s(v){ return v == null ? "" : String(v); }
+function toNum(v){ v = s(v).trim(); if (v === "") return null; var n = Number(v); return isFinite(n) ? n : null; }
+function toInt(v){ var n = toNum(v); return n == null ? null : Math.round(n); }
+function splitList(v){ v = s(v).trim(); if (!v) return []; return v.split(";").map(function(x){return x.trim();}).filter(Boolean); }
+
+/* Returns a prepared row or null when the row is malformed (e.g. half-written tail of a growing file). */
+function prepRow(r){
+  if (!r) return null;
+  if (r.id === undefined && r["﻿id"] !== undefined) r.id = r["﻿id"];   // BOM not stripped by parser
+  var id = s(r.id).trim();
+  if (!/^[0-9A-Za-z]{10,16}$/.test(id)) return null;
+  var url = s(r.store_url).trim();
+  // the last column must be complete: store_url ends with the (lowercased) id
+  if (!url || url.toLowerCase().slice(-id.length - 1) !== "/" + id.toLowerCase()) return null;
+  var o = {};
+  for (var i = 0; i < CSV_COLUMNS.length; i++){ var k = CSV_COLUMNS[i]; o[k] = s(r[k]); }
+  o.id = id; o.store_url = url;
+  o.price = toNum(r.price); if (o.price == null) o.price = 0;
+  o.rating = toNum(r.rating); if (o.rating == null) o.rating = 0;
+  o.rating_count = toInt(r.rating_count); if (o.rating_count == null) o.rating_count = 0;
+  o.description_length = toInt(r.description_length);
+  o.languages_count = toInt(r.languages_count);
+  o.size_bytes = toInt(r.size_bytes);
+  o.last_update = s(r.last_update).trim();
+  o.release_date = s(r.release_date).trim();
+  var cats = splitList(r.categories);
+  var prim = s(r.category).trim();
+  if (prim && cats.indexOf(prim) < 0) cats.unshift(prim);
+  o._cats = cats;
+  o._src = s(r.has_source_code).trim().toLowerCase() === "yes";
+  o._site = s(r.website).trim() !== "";
+  var up = id.toUpperCase();
+  o._kind = up.charAt(0) === "9" ? "msix" : (up.slice(0,2) === "XP" ? "win32" : "other");
+  o._t = o.title.toLowerCase();
+  o._p = o.publisher.toLowerCase();
+  o._c = (prim + "\n" + o.categories).toLowerCase();
+  o._d = o.short_description.toLowerCase();
+  o._td = o._t + "\n" + o._d;
+  o._h = o._t + "\n" + o._p + "\n" + o._c + "\n" + o._d;
+  o._pass = true;
+  // Поля выбранного рынка (заполняет UI при смене страны). pp — цена, по которой фильтруем и сортируем.
+  o.pp = o.price; o._ms = null; o._mcur = ""; o._mmsrp = null; o._mtax = ""; o._disc = null;
+  o._nm = null; o._nl = null; o._np = null; o._nc = null; o._curs = "";
+  return o;
+}
+
+/* Query syntax: terms AND-ed; "OR" (or "|") between terms; "exact phrase"; -term; field:term, field:"phrase", -field:"phrase". */
+function parseQuery(q){
+  q = s(q);
+  var re = /(-?)(?:([A-Za-zА-Яа-яЁё]+):)?(?:"([^"]*)"?|([^\s"]+))/g;
+  var tokens = [], m;
+  while ((m = re.exec(q)) !== null){
+    if (m[0] === "") { re.lastIndex++; continue; }
+    var neg = m[1] === "-", fieldRaw = m[2], quoted = m[3] !== undefined, text = quoted ? m[3] : m[4];
+    if (!quoted && !fieldRaw && !neg && (text === "OR" || text === "|")) { tokens.push({op:"OR"}); continue; }
+    var field = null;
+    if (fieldRaw){
+      field = FIELD_ALIASES[fieldRaw.toLowerCase()] || null;
+      if (!field) text = fieldRaw + ":" + (text || "");   // unknown prefix -> plain text (e.g. "http:")
+    }
+    text = s(text).toLowerCase();
+    if (!quoted) text = text.trim();
+    if (text === "" || text === "-") continue;
+    tokens.push({neg:neg, field:field, text:text});
+  }
+  // group: AND of OR-groups
+  var groups = [], cur = null, pendingOr = false;
+  for (var i = 0; i < tokens.length; i++){
+    var t = tokens[i];
+    if (t.op === "OR"){ pendingOr = cur !== null; continue; }
+    if (pendingOr && cur){ cur.push(t); }
+    else { cur = [t]; groups.push(cur); }
+    pendingOr = false;
+  }
+  return {groups: groups, empty: groups.length === 0};
+}
+
+function hayFor(row, field, scope){
+  switch (field){
+    case "title": return row._t;
+    case "publisher": return row._p;
+    case "category": return row._c;
+    case "desc": return row._d;
+  }
+  return scope === "title" ? row._t : scope === "td" ? row._td : row._h;
+}
+
+function matchQuery(row, pq, scope){
+  if (!pq || pq.empty) return true;
+  var gs = pq.groups;
+  for (var i = 0; i < gs.length; i++){
+    var g = gs[i], any = false;
+    for (var j = 0; j < g.length; j++){
+      var t = g[j];
+      var hit = hayFor(row, t.field, scope).indexOf(t.text) >= 0;
+      if (t.neg ? !hit : hit){ any = true; break; }
+    }
+    if (!any) return false;
+  }
+  return true;
+}
+
+/* Terms to highlight in title / short description. */
+function highlightTerms(pq, scope){
+  var title = [], desc = [];
+  if (pq && !pq.empty) pq.groups.forEach(function(g){ g.forEach(function(t){
+    if (t.neg) return;
+    if (t.field === "title" || (!t.field && scope !== "none")) title.push(t.text);
+    if (t.field === "desc" || (!t.field && scope !== "title")) desc.push(t.text);
+  });});
+  return {title: title, desc: desc};
+}
+
+var DEFAULT_STATE = {q:"", scope:"all", cats:[], price:"any", pmin:"", pmax:"", rmin:"", rcmin:"", rated:false,
+  dfrom:"", dto:"", dlmin:"", dlmax:"", lcmin:"", lcmax:"", src:false, site:false, kind:"all", sort:[], cols:null,
+  market:"US", avail:false, nmmin:""};
+
+/* Цена берётся из r.pp — цены выбранного рынка (null = в рынке не опубликовано/недоступно/нет данных). */
+function compileFilters(st){
+  var preds = [];
+  var pmin = toNum(st.pmin), pmax = toNum(st.pmax), rmin = toNum(st.rmin), rcmin = toNum(st.rcmin);
+  var dlmin = toNum(st.dlmin), dlmax = toNum(st.dlmax), lcmin = toNum(st.lcmin), lcmax = toNum(st.lcmax), nmmin = toNum(st.nmmin);
+  if (st.price === "free") preds.push(function(r){ return r.pp === 0; });
+  else if (st.price === "paid") preds.push(function(r){ return r.pp != null && r.pp > 0; });
+  if (pmin != null) preds.push(function(r){ return r.pp != null && r.pp >= pmin; });
+  if (pmax != null) preds.push(function(r){ return r.pp != null && r.pp <= pmax; });
+  // _ms: 2 — доступно, 1 — карточка есть, получить нельзя, 0 — не опубликовано, null — данных о рынке нет
+  if (st.avail) preds.push(function(r){ return r._ms == null || r._ms === 2; });
+  if (nmmin != null && nmmin > 0) preds.push(function(r){ return r._nm != null && r._nm >= nmmin; });
+  if (rmin != null && rmin > 0) preds.push(function(r){ return r.rating >= rmin; });
+  if (rcmin != null && rcmin > 0) preds.push(function(r){ return r.rating_count >= rcmin; });
+  if (st.rated) preds.push(function(r){ return r.rating > 0; });
+  if (st.dfrom) preds.push(function(r){ return r.last_update !== "" && r.last_update >= st.dfrom; });
+  if (st.dto) preds.push(function(r){ return r.last_update !== "" && r.last_update <= st.dto; });
+  if (dlmin != null) preds.push(function(r){ return r.description_length != null && r.description_length >= dlmin; });
+  if (dlmax != null) preds.push(function(r){ return r.description_length != null && r.description_length <= dlmax; });
+  if (lcmin != null) preds.push(function(r){ return r.languages_count != null && r.languages_count >= lcmin; });
+  if (lcmax != null) preds.push(function(r){ return r.languages_count != null && r.languages_count <= lcmax; });
+  if (st.src) preds.push(function(r){ return r._src; });
+  if (st.site) preds.push(function(r){ return r._site; });
+  if (st.kind === "msix" || st.kind === "win32") preds.push(function(r){ return r._kind === st.kind; });
+  var n = preds.length;
+  return function(r){ for (var i = 0; i < n; i++) if (!preds[i](r)) return false; return true; };
+}
+
+/* Sets row._pass; returns count and per-category counts under all filters except the category filter. */
+function applyFilters(rows, st, pq){
+  pq = pq || parseQuery(st.q);
+  var f = compileFilters(st);
+  var sel = st.cats && st.cats.length ? new Set(st.cats) : null;
+  var catCounts = new Map(), n = 0, scope = st.scope;
+  for (var i = 0; i < rows.length; i++){
+    var r = rows[i];
+    var ok = f(r) && matchQuery(r, pq, scope);
+    var pass = ok;
+    if (ok){
+      var cs = r._cats, hitCat = !sel;
+      for (var j = 0; j < cs.length; j++){
+        catCounts.set(cs[j], (catCounts.get(cs[j]) || 0) + 1);
+        if (sel && !hitCat && sel.has(cs[j])) hitCat = true;
+      }
+      pass = hitCat;
+    }
+    r._pass = pass;
+    if (pass) n++;
+  }
+  return {count: n, catCounts: catCounts};
+}
+
+/* ---- URL hash <-> state ---- */
+function stateToHash(st, defaultCols){
+  var p = [];
+  function add(k, v){ p.push(k + "=" + encodeURIComponent(v)); }
+  Object.keys(DEFAULT_STATE).forEach(function(k){
+    var v = st[k], d = DEFAULT_STATE[k];
+    if (k === "cats"){ if (v && v.length) add(k, v.join("|")); return; }
+    if (k === "sort"){ if (v && v.length) add(k, v.map(function(x){return x.field + ":" + x.dir;}).join(",")); return; }
+    if (k === "cols"){ if (v && defaultCols && v.join(",") !== defaultCols.join(",")) add(k, v.join(",")); return; }
+    if (typeof d === "boolean"){ if (v) add(k, "1"); return; }
+    if (v != null && v !== "" && v !== d) add(k, v);
+  });
+  return p.join("&");
+}
+function hashToState(h){
+  var st = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  h = s(h).replace(/^#/, "");
+  if (!h) return st;
+  h.split("&").forEach(function(kv){
+    var i = kv.indexOf("="); if (i < 0) return;
+    var k = kv.slice(0, i), v;
+    try { v = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, "%20")); } catch(e){ return; }
+    if (!(k in DEFAULT_STATE)) return;
+    var d = DEFAULT_STATE[k];
+    if (k === "cats") st.cats = v ? v.split("|") : [];
+    else if (k === "sort") st.sort = v ? v.split(",").map(function(x){ var a = x.split(":"); return {field:a[0], dir:a[1] === "desc" ? "desc" : "asc"}; }).filter(function(x){return x.field;}) : [];
+    else if (k === "cols") st.cols = v ? v.split(",") : null;
+    else if (typeof d === "boolean") st[k] = v === "1" || v === "true";
+    else st[k] = v;
+  });
+  return st;
+}
+
+function escHtml(t){ return s(t).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function escRe(t){ return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function highlight(text, terms){
+  text = s(text);
+  if (!terms || !terms.length) return escHtml(text);
+  var uniq = Array.from(new Set(terms)).sort(function(a,b){ return b.length - a.length; });
+  var re = new RegExp(uniq.map(escRe).join("|"), "gi");
+  var out = "", last = 0, m;
+  while ((m = re.exec(text)) !== null){
+    if (m[0] === ""){ re.lastIndex++; continue; }
+    out += escHtml(text.slice(last, m.index)) + "<mark>" + escHtml(m[0]) + "</mark>";
+    last = m.index + m[0].length;
+  }
+  return out + escHtml(text.slice(last));
+}
+
+/* ---- данные из viewer_server.py ---- */
+var TAX = {
+  vatincluded:      ["с НДС", "Цена включает НДС"],
+  gstincluded:      ["с GST", "Цена включает налог GST"],
+  taxesincluded:    ["с налогом", "Цена включает налоги"],
+  taxesnotincluded: ["без налога", "Налог в цену не входит и добавляется при оплате (как в США)"],
+  noapplicabletaxes:["без налога", "Налог к покупке не применяется"]
+};
+function taxLabel(t){ t = s(t); if (!t) return ""; var k = TAX[t.toLowerCase()]; if (k) return k[0]; return /not/i.test(t) || /^no/i.test(t) ? "без налога" : /included/i.test(t) ? "с налогом" : t; }
+function taxHint(t){ t = s(t); var k = TAX[t.toLowerCase()]; return k ? k[1] + " (" + t + ")" : t; }
+
+var STORE_URL = "https://apps.microsoft.com/detail/";
+/* /api/apps: {n, cols, dicts:{col:[значения]}, data:{col:[по строке; для колонок из dicts — номер значения]}} -> строки таблицы.
+   Логотип не передаётся (has_logo = 1 — картинка по /api/logo/{id}), store_url = null — стандартный адрес по id. */
+function appsFromJson(j){
+  var n = j.n, cols = j.cols, data = j.data, dicts = j.dicts || {}, rows = [], skipped = 0, seen = new Set(), dups = 0;
+  var get = cols.map(function(c){ var col = data[c], d = dicts[c]; return d ? function(i){ return d[col[i]]; } : function(i){ return col[i]; }; });
+  for (var i = 0; i < n; i++){
+    var r = {};
+    for (var k = 0; k < cols.length; k++) r[cols[k]] = get[k](i);
+    if (!r.store_url && r.id) r.store_url = STORE_URL + String(r.id).toLowerCase();
+    var o = prepRow(r);
+    if (!o){ skipped++; continue; }
+    if (seen.has(o.id)){ dups++; continue; }
+    seen.add(o.id);
+    o._logo = !!r.has_logo;
+    rows.push(o);
+  }
+  return {rows: rows, skipped: skipped, dups: dups};
+}
+
+/* /api/prices?market=XX (колонки id, a — available, c/t — номера валюты/налога, p — price, m — msrp) в массивы,
+   выровненные по индексу строк таблицы. index: Map id -> позиция в ROWS, n — число строк.
+   status: 0 — не опубликовано, 1 — получить нельзя, 2 — доступно. */
+function marketFromJson(j, index, n){
+  var status = new Uint8Array(n), price = new Float64Array(n), msrp = new Float64Array(n), cur = new Uint8Array(n), tax = new Uint8Array(n);
+  var curs = j.currencies, taxes = j.taxes, ids = j.id;
+  var st = {listed:0, available:0, paid:0, onsale:0, unknownIds:0, curCount:{}, taxCount:{}};
+  for (var k = 0; k < ids.length; k++){
+    var i = index.get(ids[k]);
+    if (i === undefined){ st.unknownIds++; continue; }
+    st.listed++;
+    if (!j.a[k]){ status[i] = 1; continue; }
+    status[i] = 2; st.available++;
+    var pr = Number(j.p[k]) || 0, ms = Number(j.m[k]) || 0;
+    price[i] = pr; msrp[i] = ms > pr ? ms : pr;
+    if (pr > 0) st.paid++;
+    if (ms > pr) st.onsale++;
+    cur[i] = j.c[k]; tax[i] = j.t[k];
+    var cn = curs[j.c[k]], tn = taxes[j.t[k]];
+    st.curCount[cn] = (st.curCount[cn] || 0) + 1; st.taxCount[tn] = (st.taxCount[tn] || 0) + 1;
+  }
+  function top(o){ var best = "", c = -1; Object.keys(o).forEach(function(x){ if (o[x] > c){ c = o[x]; best = x; } }); return best; }
+  st.mainCur = top(st.curCount); st.mainTax = top(st.taxCount);
+  return {status:status, price:price, msrp:msrp, cur:cur, tax:tax, curs:curs, taxes:taxes, stats:st, collectedAt: j.collected_at};
+}
+
+var moneyFmts = {}, decFmt = null;
+function fmtMoney(v, cur){
+  if (v == null || isNaN(v)) return "";
+  if (!cur){ decFmt = decFmt || new Intl.NumberFormat("ru-RU", {maximumFractionDigits:2}); return decFmt.format(v); }
+  var f = moneyFmts[cur];
+  if (!f){
+    try { f = new Intl.NumberFormat("ru-RU", {style:"currency", currency:cur}); }
+    catch (e){ f = {format:function(x){ return fmtMoney(x, "") + " " + cur; }}; }
+    moneyFmts[cur] = f;
+  }
+  return f.format(v);
+}
+function currencySymbol(cur){
+  if (!cur) return "";
+  try { var p = new Intl.NumberFormat("ru-RU", {style:"currency", currency:cur}).formatToParts(1).filter(function(x){ return x.type === "currency"; })[0]; return p ? p.value : cur; }
+  catch (e){ return cur; }
+}
+function storeLink(id, market){ return "https://apps.microsoft.com/detail/" + encodeURIComponent(id) + "?hl=ru-RU&gl=" + encodeURIComponent(market || "US"); }
+function discountPct(price, msrp){ return msrp > price && msrp > 0 ? Math.round((1 - price / msrp) * 100) : 0; }
+
+global.Core = {CSV_COLUMNS:CSV_COLUMNS, DEFAULT_STATE:DEFAULT_STATE, prepRow:prepRow, parseQuery:parseQuery, matchQuery:matchQuery,
+  highlightTerms:highlightTerms, compileFilters:compileFilters, applyFilters:applyFilters, stateToHash:stateToHash, hashToState:hashToState,
+  highlight:highlight, escHtml:escHtml, toNum:toNum,
+  taxLabel:taxLabel, taxHint:taxHint, appsFromJson:appsFromJson, marketFromJson:marketFromJson, fmtMoney:fmtMoney, currencySymbol:currencySymbol, storeLink:storeLink, discountPct:discountPct};
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+
+<!-- ===== UI ===== -->
+<script>
+(function(){
+"use strict";
+var C = window.Core;
+var $ = function(id){ return document.getElementById(id); };
+var ROWS = [], table = null, tableReady = false, state = C.hashToState(location.hash), PQ = C.parseQuery(""), HL = {title:[], desc:[]};
+var totalCatCounts = new Map(), catOrder = [];
+var fmtInt = new Intl.NumberFormat("ru-RU");
+var ICON_CODE = '<svg viewBox="0 0 24 24"><path d="M8.7 16.6 4.1 12l4.6-4.6L7.3 6 1.3 12l6 6 1.4-1.4zm6.6 0 4.6-4.6-4.6-4.6L16.7 6l6 6-6 6-1.4-1.4z"/></svg>';
+var ICON_WEB = '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4a14 14 0 0 1 1.9 4h-3.8A14 14 0 0 1 12 4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4H4.3zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.3-3.6C8.8 5.5 8.3 6.7 8 8zm4 12a14 14 0 0 1-1.9-4h3.8A14 14 0 0 1 12 20zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.7-5.6a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4h-3.4z"/></svg>';
+
+/* ---------- цены по рынкам: состояние ----------
+   Все данные — из viewer_server.py (API над msstore.db). MINFO — рынки из /api/markets:
+     MINFO[XX] = {collected_at (null — ещё собирается), listed, available}.
+   MODE: "base" — США по каталогу (apps.price, пока рынок US не собран); "market" — цены рынка; "none" — рынок ещё не собран. */
+var API = "api/";
+/* STATIC — страница выгружена export_static.py (GitHub Pages): ответы API лежат файлами в data/, сервера нет. */
+var STATIC = true;
+var MARKETS = [], MINFO = {}, MFP = "";
+var MCACHE = new Map(), ID_INDEX = new Map(), EXTRA = null;
+var MODE = "base", MD = null, MLOADING = false, MERR = "", SUMMARY_ON = false, SUMMARY_ERR = "", SUMMARY_N = 0, MARKETS_ERR = "";
+var marketGen = 0, summaryGen = 0;
+var regionNames = null;
+try { regionNames = new Intl.DisplayNames(["ru"], {type:"region"}); } catch (e){}
+function mname(code){ try { var n = regionNames && regionNames.of(code); return n && n !== code ? n : code; } catch (e){ return code; } }
+function mlabel(code){ return code + " — " + mname(code); }
+function curMarket(){
+  var m = String(state.market || "").toUpperCase();
+  if (!MARKETS.length) return /^[A-Z]{2}$/.test(m) ? m : "US";   // список рынков ещё не пришёл
+  return MINFO[m] ? m : "US";
+}
+function isCollected(m){ return !!(MINFO[m] && MINFO[m].collected_at); }
+function loadedMarkets(){ return MARKETS.filter(isCollected); }
+function hasPrices(){ return loadedMarkets().length > 0; }
+function lastCollected(){ return MARKETS.reduce(function(a, m){ var c = MINFO[m] && MINFO[m].collected_at || ""; return c > a ? c : a; }, "").slice(0, 10); }
+/* fetch JSON с понятной ошибкой: сервер не запущен / ответил ошибкой. */
+function apiGet(path, onProgress){
+  if (STATIC) return staticGet(staticPath(path), onProgress);
+  return fetch(API + path, {cache: "no-cache"}).then(function(r){
+    if (!r.ok) return r.json().catch(function(){ return {}; }).then(function(j){ var e = new Error(j.error || ("HTTP " + r.status)); e.status = r.status; throw e; });
+    var total = Number(r.headers.get("X-Raw-Length")) || 0;
+    if (!onProgress || !total || !r.body || !window.TextDecoder) return r.json();
+    // потоковое чтение — чтобы показать прогресс загрузки большого ответа (каталог ~50 МБ JSON)
+    var reader = r.body.getReader(), dec = new TextDecoder("utf-8"), parts = [], got = 0;
+    return (function pump(){
+      return reader.read().then(function(x){
+        if (x.done){ parts.push(dec.decode()); return JSON.parse(parts.join("")); }
+        got += x.value.length; parts.push(dec.decode(x.value, {stream: true})); onProgress(Math.min(1, got / total));
+        return pump();
+      });
+    })();
+  }, function(err){ var e = new Error(String(err && err.message || err)); e.network = true; throw e; });
+}
+/* Адрес API -> файл выгрузки (см. export_static.py). */
+function staticPath(path){
+  var m = /^prices\?market=([A-Za-z]{2})$/.exec(path);
+  if (m) return "data/prices/" + m[1].toUpperCase() + ".json.gz";
+  if (path === "markets") return "data/markets.json";
+  return "data/" + path + ".json.gz";
+}
+/* Шард с ценами приложения по рынкам — та же функция, что app_shard в export_static.py. */
+function appShard(id){
+  var h = 0;
+  for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 65536;
+  return ("0" + (h % 256).toString(16)).slice(-2);
+}
+/* Файл целиком, с прогрессом по Content-Length; gzip распаковывается здесь (Pages отдаёт .gz без Content-Encoding),
+   а если браузер уже распаковал его сам — разбирается как есть. */
+function staticGet(url, onProgress){
+  return fetch(url, {cache: "no-cache"}).then(function(r){
+    if (!r.ok){ var e = new Error("HTTP " + r.status + " — " + url); e.status = r.status; throw e; }
+    var total = Number(r.headers.get("Content-Length")) || 0;
+    var bytes = (!onProgress || !total || !r.body) ? r.arrayBuffer().then(function(b){ return new Uint8Array(b); }) : (function(){
+      var reader = r.body.getReader(), parts = [], got = 0;
+      return (function pump(){
+        return reader.read().then(function(x){
+          if (x.done){ var all = new Uint8Array(got), o = 0; parts.forEach(function(p){ all.set(p, o); o += p.length; }); return all; }
+          got += x.value.length; parts.push(x.value); onProgress(Math.min(1, got / total));
+          return pump();
+        });
+      })();
+    })();
+    return bytes.then(function(b){
+      if (b[0] !== 0x1f || b[1] !== 0x8b) return JSON.parse(new TextDecoder("utf-8").decode(b));
+      return new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"))).json();
+    });
+  }, function(err){ var e = new Error(String(err && err.message || err)); e.network = true; throw e; });
+}
+/* Логотипы на статике — отдельным файлом после каталога (на сервере их отдавал редирект /api/logo/{id}). */
+function loadLogos(){
+  if (!STATIC) return;
+  apiGet("logos").then(function(j){
+    for (var k = 0; k < j.id.length; k++){ var i = ID_INDEX.get(j.id[k]); if (i !== undefined) ROWS[i].logo_url = j.logo_url[k] || ""; }
+    if (table) table.redraw(true);
+    if (DETAIL_ID) renderDetail();
+  }, function(err){ console.warn("логотипы не загрузились", err); });
+}
+function errText(err){
+  if (STATIC) return err && err.network ? "Нет связи с сайтом (" + esc(err.message) + "). Проверьте интернет и обновите страницу." : esc(err && err.message || String(err));
+  return err && err.network ? "Сервер недоступен (" + esc(err.message) + "). Запустите в папке каталога <code>python viewer_server.py</code> и обновите страницу."
+    : esc(err && err.message || String(err));
+}
+function money(v, cur){ return C.fmtMoney(v, cur); }
+
+function esc(t){ return C.escHtml(t); }
+/* Логотип — через сервер (/api/logo/{id} редиректит на картинку Store), в списке приложений ссылки не передаются. */
+function logoSrc(d){
+  if (STATIC){ var u = d && d._logo && d.logo_url; return u ? u + (u.indexOf("?") < 0 ? "?w=64&h=64&q=70" : "") : ""; }
+  return d && d._logo ? API + "logo/" + encodeURIComponent(d.id) : ""; }
+function humanSize(b){
+  if (b == null) return "";
+  if (b >= 1073741824) return (b / 1073741824).toFixed(2).replace(".", ",") + " ГБ";
+  return (b / 1048576).toFixed(1).replace(".", ",") + " МБ";
+}
+function linkFor(d){ return C.storeLink(d.id, curMarket()); }
+/* Сортировка чисел, в которой «нет значения» всегда внизу, в обе стороны. */
+function nullsLast(key){
+  return function(a, b, aRow, bRow, col, dir){
+    var x = aRow.getData()[key], y = bRow.getData()[key];
+    var xn = x == null, yn = y == null;
+    if (xn || yn) return xn && yn ? 0 : (xn ? 1 : -1) * (dir === "asc" ? 1 : -1);
+    return x - y;
+  };
+}
+var MS_TEXT = {2:["доступно", "ok", "В этом рынке приложение можно получить/купить"], 1:["нельзя получить", "bad", "Карточка в рынке есть, но кнопки «Получить/Купить» нет"], 0:["не опубликовано", "dim", "В этом рынке каталог приложение не отдаёт"]};
+
+/* ---------- columns ---------- */
+var COLS = [
+  {title:"", field:"logo_url", width:48, cssClass:"stack", headerSort:false, resizable:false, hozAlign:"center", exportField:"logo_url", menuTitle:"Логотип",
+    formatter:function(c){ var u = logoSrc(c.getData()); return u ? '<img class="logo" loading="lazy" decoding="async" alt="" src="' + esc(u) + '" onerror="this.classList.add(\'broken\')">' : '<div class="logo"></div>'; }},
+  {title:"Название", field:"title", minWidth:220, cssClass:"stack", widthGrow:4, exportField:"title",
+    formatter:function(c){ var d = c.getData();
+      return '<div class="t1"><a href="' + esc(linkFor(d)) + '" target="_blank" rel="noopener">' + C.highlight(d.title, HL.title) + '</a></div>' +
+             (d.short_description ? '<div class="t2">' + C.highlight(d.short_description, HL.desc) + '</div>' : ''); },
+    tooltip:function(e, c){ var d = c.getData(); return d.short_description ? d.title + "\n\n" + d.short_description : d.title; }},
+  {title:"Издатель", field:"publisher", minWidth:100, widthGrow:1.4, exportField:"publisher", tooltip:true},
+  {title:"Категория", field:"category", minWidth:100, widthGrow:1.1, exportField:"category",
+    tooltip:function(e, c){ return c.getData().categories || c.getValue(); }},
+  {title:"Цена", field:"price", width:104, hozAlign:"right", sorter:nullsLast("pp"), exportField:"display_price", headerTooltip:"Цена в выбранной стране",
+    formatter:function(c){ var d = c.getData();
+      if (MODE === "base") return d.price > 0 ? '<span class="num">' + esc(money(d.price, "USD")) + '</span>' : (d.display_price ? '<span class="dim">' + esc(d.display_price) + '</span>' : '<span class="dim">—</span>');
+      if (MODE !== "market") return '<span class="dim">—</span>';
+      if (d._ms !== 2) return '<span class="dim">' + (d._ms === 1 ? "недоступно" : "нет") + '</span>';
+      var t = d.pp === 0 ? "Бесплатно" : money(d.pp, d._mcur);
+      if (d._disc > 0) return '<span class="sale">' + esc(t) + '</span>';
+      return d.pp === 0 ? '<span class="dim">' + t + '</span>' : '<span class="num">' + esc(t) + '</span>'; },
+    tooltip:function(e, c){ var d = c.getData(); if (MODE !== "market") return MODE === "base" ? "США — цена из каталога (рынок US ещё не собран)" : "Нет данных по рынку " + curMarket();
+      if (d._ms !== 2) return MS_TEXT[d._ms || 0][2];
+      return money(d.pp, d._mcur) + (d._disc > 0 ? " (было " + money(d._mmsrp, d._mcur) + ")" : "") + " · " + C.taxHint(d._mtax); }},
+  {title:"Доступность", field:"_ms", width:124, sorter:nullsLast("_ms"), cond:"market", visible:false, menuTitle:"Доступность в стране",
+    formatter:function(c){ var v = c.getValue(); if (v == null) return ""; var t = MS_TEXT[v]; return '<span class="' + t[1] + '">' + t[0] + '</span>'; },
+    tooltip:function(e, c){ var v = c.getValue(); return v == null ? "" : MS_TEXT[v][2]; }},
+  {title:"Скидка", field:"_disc", width:130, hozAlign:"right", sorter:nullsLast("_disc"), cond:"market", visible:false, menuTitle:"Скидка в стране", headerTooltip:"Скидка от базовой цены (MSRP)",
+    formatter:function(c){ var d = c.getData(); if (!(d._disc > 0)) return ""; return '<span class="sale">−' + d._disc + '&nbsp;%</span><s class="dim num">' + esc(money(d._mmsrp, d._mcur)) + '</s>'; },
+    tooltip:function(e, c){ var d = c.getData(); return d._disc > 0 ? "Было " + money(d._mmsrp, d._mcur) + ", сейчас " + money(d.pp, d._mcur) : ""; }},
+  {title:"Налог", field:"_mtax", width:104, cond:"market", visible:false, menuTitle:"Налог в цене",
+    formatter:function(c){ return esc(C.taxLabel(c.getValue())); }, tooltip:function(e, c){ return C.taxHint(c.getValue()); }},
+  {title:"Рейтинг", field:"rating", width:88, hozAlign:"right", sorter:"number", exportField:"rating",
+    formatter:function(c){ var v = c.getValue(); return v > 0 ? '<span class="num"><span class="star">★</span> ' + v.toFixed(1).replace(".", ",") + '</span>' : '<span class="dim">—</span>'; }},
+  {title:"Оценок", field:"rating_count", width:90, hozAlign:"right", sorter:"number", exportField:"rating_count",
+    formatter:function(c){ var v = c.getValue(); return v > 0 ? '<span class="num">' + fmtInt.format(v) + '</span>' : '<span class="dim">0</span>'; }},
+  {title:"Обновлено", field:"last_update", width:106, exportField:"last_update", formatter:function(c){ return '<span class="num">' + esc(c.getValue()) + '</span>'; }},
+  {title:"Описание", field:"description_length", width:100, menuTitle:"Длина описания", headerTooltip:"Длина полного описания, символов", hozAlign:"right", sorter:"number", exportField:"description_length",
+    formatter:function(c){ var v = c.getValue(); return v == null ? "" : '<span class="num">' + fmtInt.format(v) + '</span>'; }},
+  {title:"Языков", field:"languages_count", width:84, hozAlign:"right", sorter:"number", exportField:"languages_count",
+    tooltip:function(e, c){ return c.getData().languages || ""; }},
+  {title:"Рынков", field:"_nm", width:84, hozAlign:"right", sorter:nullsLast("_nm"), cond:"summary", visible:false, menuTitle:"Доступно в рынках (сводка)", headerTooltip:"В скольких собранных рынках приложение можно получить",
+    formatter:function(c){ var v = c.getValue(); return v == null ? "" : '<span class="num' + (v ? "" : " dim") + '">' + fmtInt.format(v) + '</span>'; },
+    tooltip:function(e, c){ var d = c.getData(); return d._nm == null ? "" : "Карточка в " + d._nl + " рынках, доступно в " + d._nm + ", платно в " + d._np + " (из " + loadedMarkets().length + " загруженных рынков)"; }},
+  {title:"Валют", field:"_nc", width:72, hozAlign:"right", sorter:nullsLast("_nc"), cond:"summary", visible:false, menuTitle:"Число валют (сводка)", headerTooltip:"Сколько разных валют у цены по рынкам",
+    formatter:function(c){ var v = c.getValue(); return v == null ? "" : '<span class="num">' + v + '</span>'; }, tooltip:function(e, c){ return (c.getData()._curs || "").replace(/;/g, ", "); }},
+  {title:"Код", field:"_src", width:60, hozAlign:"center", sorter:"boolean", exportField:"source_code_url", menuTitle:"Исходный код",
+    formatter:function(c){ var d = c.getData(); if (!d._src) return "";
+      return d.source_code_url ? '<a class="ico" href="' + esc(d.source_code_url) + '" target="_blank" rel="noopener" title="' + esc(d.source_code_url) + '">' + ICON_CODE + '</a>' : '<span class="ico" title="Исходный код есть, ссылки нет">' + ICON_CODE + '</span>'; }},
+  {title:"Сайт", field:"website", width:62, hozAlign:"center", exportField:"website",
+    formatter:function(c){ var u = c.getValue(); return u ? '<a class="ico" href="' + esc(u) + '" target="_blank" rel="noopener" title="' + esc(u) + '">' + ICON_WEB + '</a>' : ""; }},
+  {title:"Размер", field:"size_bytes", width:100, hozAlign:"right", sorter:"number", visible:false, exportField:"size_bytes",
+    formatter:function(c){ return '<span class="num">' + humanSize(c.getValue()) + '</span>'; }},
+  {title:"Платформы", field:"platforms", minWidth:140, widthGrow:1.5, visible:false, exportField:"platforms", tooltip:true},
+  {title:"Языки", field:"languages", minWidth:140, widthGrow:1.5, visible:false, exportField:"languages", tooltip:true},
+  {title:"Выпуск", field:"release_date", width:104, visible:false, exportField:"release_date"},
+  {title:"ID", field:"id", width:120, visible:false, exportField:"id", formatter:function(c){ return '<span class="num">' + esc(c.getValue()) + '</span>'; }}
+];
+// Колонки рынка и сводки видны по умолчанию, но показываются, только когда для них есть данные.
+var COND = {};
+COLS.forEach(function(c){ if (c.cond) COND[c.field] = c.cond; });
+var DEFAULT_COLS = COLS.filter(function(c){ return c.visible !== false || c.cond; }).map(function(c){ return c.field; });
+if (state.cols){ var vis = new Set(state.cols); COLS.forEach(function(c){ c.visible = vis.has(c.field) && !c.cond; }); }
+function condOk(field){ var k = COND[field]; return !k || (k === "market" ? MODE === "market" : SUMMARY_ON); }
+
+/* ---------- state <-> form ---------- */
+var TEXT_FIELDS = ["pmin","pmax","rmin","rcmin","dfrom","dto","dlmin","dlmax","lcmin","lcmax","nmmin"];
+var BOOL_FIELDS = ["rated","src","site","avail"];
+function stateToForm(){
+  $("q").value = state.q; $("scope").value = state.scope;
+  TEXT_FIELDS.forEach(function(k){ $(k).value = state[k] || ""; });
+  BOOL_FIELDS.forEach(function(k){ $(k).checked = !!state[k]; });
+  document.querySelectorAll('input[name=price]').forEach(function(r){ r.checked = r.value === state.price; });
+  document.querySelectorAll('input[name=kind]').forEach(function(r){ r.checked = r.value === state.kind; });
+  if ($("market").options.length) $("market").value = curMarket();
+}
+function formToState(){
+  state.q = $("q").value; state.scope = $("scope").value;
+  TEXT_FIELDS.forEach(function(k){ state[k] = $(k).value.trim(); });
+  BOOL_FIELDS.forEach(function(k){ state[k] = $(k).checked; });
+  var p = document.querySelector('input[name=price]:checked'); state.price = p ? p.value : "any";
+  var k = document.querySelector('input[name=kind]:checked'); state.kind = k ? k.value : "all";
+}
+var lastHash = null;
+function writeHash(){
+  var h = C.stateToHash(state, DEFAULT_COLS);
+  lastHash = h;
+  history.replaceState(null, "", h ? "#" + h : location.pathname + location.search);
+}
+window.addEventListener("hashchange", function(){
+  var h = location.hash.replace(/^#/, "");
+  if (h === lastHash) return;
+  var prevMarket = curMarket();
+  state = C.hashToState(h); stateToForm(); applyColsFromState(); applySortFromState();
+  if (curMarket() !== prevMarket) applyMarket(); else runFilter(true);
+});
+
+/* ---------- filtering ---------- */
+var lastQ = null, lastScope = null;
+function runFilter(forceRedraw){
+  formToState();
+  if (!tableReady){ writeHash(); return; }
+  var qChanged = state.q !== lastQ || state.scope !== lastScope;
+  if (qChanged){ PQ = C.parseQuery(state.q); HL = C.highlightTerms(PQ, state.scope); lastQ = state.q; lastScope = state.scope; }
+  var t0 = performance.now();
+  var res = C.applyFilters(ROWS, state, PQ);
+  table.refreshFilter();
+  if (qChanged || forceRedraw) table.redraw(true);
+  $("found").textContent = fmtInt.format(res.count);
+  renderCats(res.catCounts);
+  $("resetBtn").disabled = C.stateToHash(Object.assign({}, state, {sort:[], cols:null, market:"US"})) === "";
+  writeHash();
+  window.__lastFilterMs = performance.now() - t0;
+  window.__lastCount = res.count;
+}
+var timer = null;
+function debounced(){ clearTimeout(timer); timer = setTimeout(runFilter, 200); }
+
+/* ---------- categories ---------- */
+function renderCats(counts){
+  var box = $("cats"), flt = $("catFilter").value.trim().toLowerCase(), sel = new Set(state.cats);
+  var names = catOrder.slice();
+  state.cats.forEach(function(c){ if (names.indexOf(c) < 0) names.push(c); });
+  var rank = new Map(names.map(function(n, i){ return [n, i]; }));
+  names.sort(function(a, b){ return (sel.has(b) - sel.has(a)) || ((counts.get(b) || 0) - (counts.get(a) || 0)) || (rank.get(a) - rank.get(b)); });
+  var html = "";
+  names.forEach(function(name){
+    if (flt && name.toLowerCase().indexOf(flt) < 0 && !sel.has(name)) return;
+    var n = counts.get(name) || 0;
+    html += '<label class="' + (n ? "" : "zero ") + (sel.has(name) ? "sel" : "") + '" title="всего ' + fmtInt.format(totalCatCounts.get(name) || 0) + '"><input type="checkbox" value="' + esc(name) + '"' + (sel.has(name) ? " checked" : "") + '> ' + esc(name) + '<span class="n">' + fmtInt.format(n) + '</span></label>';
+  });
+  box.innerHTML = html || '<div class="dim" style="padding:4px 8px">нет</div>';
+  window.__catCounts = counts;
+}
+$("cats").addEventListener("change", function(e){
+  if (e.target.type !== "checkbox") return;
+  var v = e.target.value, i = state.cats.indexOf(v);
+  if (e.target.checked && i < 0) state.cats.push(v); else if (!e.target.checked && i >= 0) state.cats.splice(i, 1);
+  debounced();
+});
+$("catsClear").addEventListener("click", function(){ state.cats = []; runFilter(); });
+$("catFilter").addEventListener("input", function(){ renderCats(window.__catCounts || new Map()); });
+
+/* ---------- inputs ---------- */
+$("q").addEventListener("input", debounced);
+$("q").addEventListener("keydown", function(e){ if (e.key === "Enter"){ clearTimeout(timer); runFilter(); } });
+$("scope").addEventListener("change", function(){ runFilter(); });
+$("side").addEventListener("input", function(e){ if (e.target.id !== "catFilter" && e.target.closest("#cats") === null) debounced(); });
+$("side").addEventListener("change", function(e){ if (e.target.type === "radio" || e.target.type === "checkbox"){ if (e.target.closest("#cats") === null) debounced(); } });
+document.querySelectorAll(".quick button").forEach(function(b){
+  b.addEventListener("click", function(){
+    var d = new Date(); d.setDate(d.getDate() - Number(b.dataset.days));
+    $("dfrom").value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    $("dto").value = ""; runFilter();
+  });
+});
+$("resetBtn").addEventListener("click", function(){
+  var keepSort = state.sort, keepCols = state.cols, keepMarket = state.market;
+  state = JSON.parse(JSON.stringify(C.DEFAULT_STATE)); state.sort = keepSort; state.cols = keepCols; state.market = keepMarket;
+  $("catFilter").value = ""; stateToForm(); runFilter();
+});
+
+/* ---------- menus ---------- */
+function toggleMenu(id){ var m = $(id), open = !m.classList.contains("open"); document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); if (open) m.classList.add("open"); }
+function closeMenus(){ document.querySelectorAll(".menu.open").forEach(function(x){ x.classList.remove("open"); }); }
+$("colsBtn").addEventListener("click", function(e){ e.stopPropagation(); buildColsMenu(); toggleMenu("colsMenu"); });
+$("expBtn").addEventListener("click", function(e){ e.stopPropagation(); toggleMenu("expMenu"); });
+$("pricesBtn").addEventListener("click", function(e){ e.stopPropagation(); toggleMenu("pricesMenu"); });
+document.addEventListener("click", function(e){ if (!e.target.closest(".menu")) closeMenus(); });
+function wantedCols(){ return new Set(state.cols || DEFAULT_COLS); }
+function buildColsMenu(){
+  var dd = $("colsDd"), html = "", want = wantedCols();
+  table.getColumns().forEach(function(col){
+    var def = col.getDefinition(), ok = condOk(def.field);
+    html += '<label' + (ok ? "" : ' class="dim" title="Появится, когда выберете собранную страну (для сводки — когда соберётся хотя бы один рынок)"') + '><input type="checkbox" data-f="' + esc(def.field) + '"' +
+      ((ok ? col.isVisible() : want.has(def.field)) ? " checked" : "") + (ok ? "" : " disabled") + '> ' + esc(def.menuTitle || def.title) + (ok ? "" : " (нужна страна)") + '</label>';
+  });
+  html += '<div class="sep"></div><button id="colsDefault" style="width:100%">По умолчанию</button>';
+  dd.innerHTML = html;
+  $("colsDefault").onclick = function(){ state.cols = null; applyColsFromState(); buildColsMenu(); writeHash(); };
+}
+$("colsDd").addEventListener("change", function(e){
+  var f = e.target.dataset.f; if (!f) return;
+  var col = table.getColumn(f); if (e.target.checked) col.show(); else col.hide();
+  var want = wantedCols();
+  state.cols = table.getColumns().filter(function(c){ var fl = c.getField(); return condOk(fl) ? c.isVisible() : want.has(fl); }).map(function(c){ return c.getField(); });
+  table.redraw(); writeHash();
+});
+$("colsDd").addEventListener("click", function(e){ e.stopPropagation(); });
+$("pricesMenu").querySelector(".dd").addEventListener("click", function(e){ e.stopPropagation(); });
+function applyColsFromState(){
+  if (!table) return;
+  var vis = wantedCols();
+  table.getColumns().forEach(function(c){ var f = c.getField(), want = vis.has(f) && condOk(f); if (want !== c.isVisible()) { if (want) c.show(); else c.hide(); } });
+  table.redraw();
+}
+function applySortFromState(){
+  if (!table) return;
+  var valid = (state.sort || []).filter(function(x){ return table.getColumn(x.field); });
+  table.setSort(valid.map(function(x){ return {column:x.field, dir:x.dir}; }));
+}
+
+/* ---------- export ---------- */
+var MARKET_EXPORT = ["market", "market_status", "market_currency", "market_price", "market_msrp", "market_on_sale", "market_discount_pct", "market_tax_type", "market_store_url"];
+var SUMMARY_EXPORT = ["markets_listed", "markets_available", "markets_paid", "currencies"];
+var MS_EXPORT = {2:"available", 1:"not_available", 0:"not_listed"};
+function exportValue(d, f){
+  switch (f){
+    case "market": return curMarket();
+    case "market_status": return d._ms == null ? "" : MS_EXPORT[d._ms];
+    case "market_currency": return d._ms === 2 ? d._mcur : "";
+    case "market_price": return d._ms === 2 ? d.pp : "";
+    case "market_msrp": return d._ms === 2 ? d._mmsrp : "";
+    case "market_on_sale": return d._ms === 2 ? (d._disc > 0 ? "yes" : "no") : "";
+    case "market_discount_pct": return d._ms === 2 && d._disc > 0 ? d._disc : "";
+    case "market_tax_type": return d._ms === 2 ? d._mtax : "";
+    case "market_store_url": return linkFor(d);
+    case "markets_listed": return d._nl == null ? "" : d._nl;
+    case "markets_available": return d._nm == null ? "" : d._nm;
+    case "markets_paid": return d._np == null ? "" : d._np;
+    case "currencies": return d._curs || "";
+  }
+  var v = d[f]; return v == null ? "" : v;
+}
+/* logo_url и screenshot_url не входят в /api/apps — для экспорта догружаются один раз из /api/apps-extra. */
+function ensureExtra(){
+  if (EXTRA) return EXTRA;
+  EXTRA = apiGet("apps-extra").then(function(j){
+    for (var k = 0; k < j.id.length; k++){ var i = ID_INDEX.get(j.id[k]); if (i !== undefined){ ROWS[i].logo_url = j.logo_url[k] || ""; ROWS[i].screenshot_url = j.screenshot_url[k] || ""; } }
+  });
+  EXTRA.catch(function(){ EXTRA = null; });
+  return EXTRA;
+}
+function exportCsv(all){
+  closeMenus();
+  var fields = exportFields(all), need = fields.indexOf("logo_url") >= 0 || fields.indexOf("screenshot_url") >= 0;
+  if (!need){ saveCsv(all, fields); return; }
+  var old = $("status").textContent;
+  $("status").textContent = "Экспорт: загрузка ссылок на логотипы и скриншоты…";
+  ensureExtra().then(function(){ $("status").textContent = old; saveCsv(all, fields); },
+    function(err){ $("status").textContent = old; alert("Экспорт не удался: " + (err && err.message || err)); });
+}
+function exportFields(all){
+  var fields;
+  if (all) fields = C.CSV_COLUMNS.slice();
+  else {
+    fields = [];
+    table.getColumns().forEach(function(c){ if (c.isVisible()){ var f = c.getDefinition().exportField; if (f && fields.indexOf(f) < 0) fields.push(f); } });
+    if (fields.indexOf("store_url") < 0) fields.push("store_url");
+  }
+  // Колонки выбранного рынка и сводки добавляются всегда, когда по ним есть данные.
+  if (MODE === "market") fields = fields.concat(MARKET_EXPORT);
+  if (SUMMARY_ON) fields = fields.concat(SUMMARY_EXPORT);
+  return fields;
+}
+function saveCsv(all, fields){
+  var data = table.getData("active");
+  var rows = data.map(function(d){ return fields.map(function(f){ return exportValue(d, f); }); });
+  var csv = "﻿" + Papa.unparse({fields: fields, data: rows});
+  var blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "msstore_filtered_" + (MODE === "market" ? curMarket() + "_" : "") + new Date().toISOString().slice(0, 10) + (all ? "_all" : "") + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+  window.__lastExport = {name: a.download, rows: rows.length, fields: fields, size: csv.length, head: csv.slice(0, 3000)};
+}
+$("expCur").addEventListener("click", function(){ exportCsv(false); });
+$("expAll").addEventListener("click", function(){ exportCsv(true); });
+
+/* ---------- страна (рынок) ---------- */
+function buildMarketSelect(){
+  var sel = $("market"), n = loadedMarkets().length, cur = curMarket();
+  var byName = function(a, b){ return mname(a).localeCompare(mname(b), "ru"); };
+  var opt = function(m, extra, off){ return '<option value="' + m + '"' + (off && m !== cur ? " disabled" : "") + '>' + esc(mlabel(m) + (extra || "")) + '</option>'; };
+  if (!MARKETS.length){ sel.innerHTML = opt(cur, cur === "US" ? " (каталог)" : ""); sel.value = cur; return; }
+  var others = MARKETS.filter(function(m){ return m !== "US"; });
+  var ready = others.filter(isCollected).sort(byName), rest = others.filter(function(m){ return !isCollected(m); }).sort(byName);
+  sel.innerHTML = '<optgroup label="Собрано: ' + n + ' из ' + MARKETS.length + '">' + opt("US", isCollected("US") ? "" : " (каталог)") +
+      ready.map(function(m){ return opt(m); }).join("") + '</optgroup>' +
+    (rest.length ? '<optgroup label="Ещё собирается (' + rest.length + ')">' + rest.map(function(m){ return opt(m, " · ещё собирается", true); }).join("") + '</optgroup>' : "");
+  sel.value = cur;
+}
+$("market").addEventListener("change", function(){ state.market = this.value; applyMarket(); });
+
+/* Цены рынка из /api/prices; кэш по (рынок, время сбора) — пересобранный рынок загрузится заново. */
+function getMarketData(m){
+  var key = m + "|" + MINFO[m].collected_at, c = MCACHE.get(key);
+  if (c) return c;
+  c = apiGet("prices?market=" + encodeURIComponent(m)).then(function(j){ return C.marketFromJson(j, ID_INDEX, ROWS.length); });
+  MCACHE.set(key, c);
+  c.catch(function(){ MCACHE.delete(key); });
+  while (MCACHE.size > 6) MCACHE.delete(MCACHE.keys().next().value);
+  return c;
+}
+
+/* Переключает поля строк на выбранный рынок и перерисовывает таблицу. */
+function applyMarket(){
+  var m = curMarket(), gen = ++marketGen;
+  MERR = "";
+  buildMarketSelect();
+  if (!ROWS.length){ renderMarketUi(); writeHash(); return; }
+  if (!isCollected(m)){ MLOADING = false; setMode(m, null); afterMarket(); return; }
+  MLOADING = true; renderMarketUi();
+  var t0 = performance.now();
+  getMarketData(m).then(function(md){
+    if (gen !== marketGen) return;
+    MLOADING = false; setMode(m, md); afterMarket();
+    window.__lastMarketMs = performance.now() - t0;
+  }, function(err){
+    if (gen !== marketGen) return;
+    MLOADING = false; MERR = "Не удалось загрузить цены " + esc(mlabel(m)) + ": " + errText(err); console.warn(err); setMode(m, null); afterMarket();
+  });
+}
+function setMode(m, md){
+  MD = md; MODE = md ? "market" : (m === "US" ? "base" : "none");
+  var n = ROWS.length, i, r;
+  if (md){
+    var st = md.status, pr = md.price, ms = md.msrp, cu = md.cur, tx = md.tax, curs = md.curs, taxes = md.taxes;
+    for (i = 0; i < n; i++){
+      r = ROWS[i]; r._ms = st[i];
+      if (st[i] === 2){ r.pp = pr[i]; r._mmsrp = ms[i]; r._mcur = curs[cu[i]]; r._mtax = taxes[tx[i]]; r._disc = C.discountPct(pr[i], ms[i]); }
+      else { r.pp = null; r._mmsrp = null; r._mcur = ""; r._mtax = ""; r._disc = null; }
+    }
+  } else {
+    var base = MODE === "base";
+    for (i = 0; i < n; i++){ r = ROWS[i]; r._ms = null; r.pp = base ? r.price : null; r._mmsrp = null; r._mcur = ""; r._mtax = ""; r._disc = null; }
+  }
+}
+function afterMarket(){
+  renderMarketUi();
+  if (!tableReady){ writeHash(); return; }
+  applyColsFromState(); applySortFromState(); runFilter(true);
+  if (DETAIL_ID) renderDetail();
+}
+
+/* Сводка по всем собранным рынкам (/api/summary): карточка / доступно / платно, валюты. */
+function loadSummary(){
+  var gen = ++summaryGen;
+  SUMMARY_ERR = "";
+  if (!ROWS.length) return;
+  if (!hasPrices()){ clearSummary(); afterMarket(); return; }
+  apiGet("summary").then(function(j){
+    if (gen !== summaryGen) return;
+    ROWS.forEach(function(r){ r._nl = 0; r._nm = 0; r._np = 0; r._curs = ""; r._nc = 0; });
+    for (var k = 0; k < j.id.length; k++){
+      var i = ID_INDEX.get(j.id[k]); if (i === undefined) continue;
+      var r = ROWS[i], cs = j.curs[j.c[k]] || "";
+      r._nl = j.l[k]; r._nm = j.a[k]; r._np = j.p[k]; r._curs = cs; r._nc = cs ? cs.split(";").length : 0;
+    }
+    SUMMARY_ON = true; SUMMARY_N = j.markets; afterMarket();
+  }, function(err){ if (gen !== summaryGen) return; SUMMARY_ERR = "Сводка по рынкам не загрузилась: " + errText(err); clearSummary(); afterMarket(); });
+}
+function clearSummary(){ SUMMARY_ON = false; ROWS.forEach(function(r){ r._nl = r._nm = r._np = r._nc = null; r._curs = ""; }); }
+
+/* Список рынков (/api/markets). Вызывается при старте, раз в минуту и по кнопке: новые собранные рынки
+   появляются без перезагрузки, сводка пересчитывается, а если собрался выбранный рынок — подгружаются его цены. */
+var marketsAt = null;
+function refreshMarkets(){
+  return apiGet("markets").then(function(j){
+    MARKETS_ERR = ""; marketsAt = new Date();
+    var info = {}, codes = [];
+    j.markets.forEach(function(r){ codes.push(r[0]); info[r[0]] = {collected_at: r[1], listed: r[2], available: r[3]}; });
+    var fp = codes.filter(function(c){ return info[c].collected_at; }).map(function(c){ return c + "=" + info[c].collected_at; }).join(",");
+    var first = !MARKETS.length, prevM = curMarket(), prevAt = MINFO[prevM] ? MINFO[prevM].collected_at : null;
+    MARKETS = codes; MINFO = info;
+    var changed = fp !== MFP; MFP = fp;
+    if (first || changed){
+      buildMarketSelect();
+      if (ROWS.length){
+        loadSummary();
+        var m = curMarket();
+        if (first || m !== prevM || (MINFO[m] ? MINFO[m].collected_at : null) !== prevAt) applyMarket();
+        else if (DETAIL_ID) renderDetail();
+      }
+    }
+    renderMarketUi();
+  }, function(err){ MARKETS_ERR = "Не удалось обновить список рынков: " + errText(err); renderMarketUi(); });
+}
+$("mRefresh").addEventListener("click", function(){
+  var b = this; b.disabled = true; b.textContent = "Обновление…";
+  refreshMarkets().then(function(){ b.disabled = false; b.textContent = "Обновить список рынков"; });
+});
+
+var NOTE_KEY = "msstore-viewer-hide-us-hint";
+function hintHidden(){ try { return localStorage.getItem(NOTE_KEY) === "1"; } catch (e){ return false; } }
+function renderMarketUi(){
+  var m = curMarket(), n = loadedMarkets().length, total = MARKETS.length, name = esc(mlabel(m));
+  if ($("market").value !== m) $("market").value = m;
+  // подсказка над таблицей
+  var el = $("mnote"), html = "", warn = false, closable = false;
+  if (!ROWS.length) html = "";
+  else if (MLOADING) html = "Загрузка цен: " + name + "…";
+  else if (MERR) { warn = true; html = MERR; }
+  else if (MODE === "base"){
+    if (!hintHidden()){ closable = true; html = "Цены — для США из каталога: рынок US ещё не собран" + (total ? " (собрано " + n + " из " + total + " рынков)" : "") +
+      ". Другие страны — в списке слева от «Рынки ▾»."; }
+  }
+  else if (MODE === "none"){
+    warn = true;
+    html = "Рынок <b>" + name + "</b> ещё собирается: готово " + n + " из " + total + " рынков. msstore_prices.py собирает их по очереди, примерно по одному в 2 минуты; " +
+      "список рынков обновляется сам раз в минуту — как только рынок соберётся, цены загрузятся.";
+  }
+  else if (MD){
+    var st = MD.stats;
+    html = "<b>" + name + "</b>: карточек " + fmtInt.format(st.listed) + ", можно получить " + fmtInt.format(st.available) + ", из них платных " + fmtInt.format(st.paid) +
+      (st.onsale ? ", со скидкой " + fmtInt.format(st.onsale) : "") + (st.mainCur ? " · валюта " + esc(Object.keys(st.curCount).filter(Boolean).join(", ")) : "") +
+      (st.mainTax ? " · цены " + esc(C.taxLabel(st.mainTax)) : "") + ". Не опубликованные в стране приложения: цена «нет»." +
+      (MD.collectedAt ? ' <span class="dim">Собран ' + esc(MD.collectedAt) + ' UTC.</span>' : "");
+  }
+  if (SUMMARY_ERR) { warn = true; html += (html ? "<br>" : "") + SUMMARY_ERR; }
+  if (MARKETS_ERR && ROWS.length) { warn = true; html += (html ? "<br>" : "") + MARKETS_ERR; }
+  el.hidden = !html;
+  el.className = warn ? "warn" : "";
+  el.innerHTML = html ? '<div class="txt">' + html + '</div>' + (closable ? '<button type="button" id="mnoteClose" title="Больше не показывать">×</button>' : "") : "";
+  if (closable) $("mnoteClose").onclick = function(){ try { localStorage.setItem(NOTE_KEY, "1"); } catch (e){} renderMarketUi(); };
+  // плейсхолдеры цены — в валюте рынка
+  var sym = MODE === "market" ? C.currencySymbol(MD.stats.mainCur) : MODE === "base" ? "$" : "";
+  $("pmin").placeholder = "от" + (sym ? " " + sym : ""); $("pmax").placeholder = "до" + (sym ? " " + sym : "");
+  // подсказка у фильтров доступности
+  var hint = [];
+  if (MODE === "base") hint.push("США по каталогу: доступность не проверялась (рынок US ещё не собран).");
+  else if (MODE === "none") hint.push("По этой стране данных ещё нет — фильтр не действует.");
+  if (SUMMARY_ON) hint.push("«Доступно в рынках» — по " + SUMMARY_N + " собранным рынкам.");
+  else hint.push(n ? "Сводка по рынкам загружается…" : "«Доступно в рынках» заработает, когда соберётся первый рынок.");
+  $("availHint").textContent = hint.join(" ");
+  // меню «Рынки»
+  $("pricesBtn").textContent = (total ? "Рынки: " + n + " из " + total : "Рынки") + " ▾";
+  $("pInfo").innerHTML = MARKETS_ERR ? MARKETS_ERR : STATIC && total ? "Рынков: " + total + ". Данные — снимок на " + esc(lastCollected()) + "." : total ? "Собрано рынков: " + n + " из " + total + ". Несобранные видны в списке с пометкой «ещё собирается». " +
+    "Список обновляется сам раз в минуту" + (marketsAt ? ", последний раз — в " + marketsAt.toLocaleTimeString("ru-RU") : "") + "." : "Список рынков загружается…";
+}
+
+/* ---------- карточка приложения ---------- */
+var DETAIL_ID = null, detailGen = 0;
+function openDetail(id){
+  var prev = DETAIL_ID; DETAIL_ID = id;
+  $("detail").hidden = false;
+  [prev, id].forEach(function(x){ if (!x || !table) return; var row = table.getRow(x); if (row) row.reformat(); });
+  renderDetail();
+  if (prev == null && table) table.redraw();
+}
+function closeDetail(){
+  var prev = DETAIL_ID; DETAIL_ID = null; $("detail").hidden = true;
+  if (prev && table){ var row = table.getRow(prev); if (row) row.reformat(); table.redraw(); }
+}
+document.addEventListener("keydown", function(e){ if (e.key === "Escape" && DETAIL_ID && !e.target.closest("input,select,textarea")) closeDetail(); });
+
+/* Цены приложения по всем собранным рынкам (/api/app): status 2 — доступно, 1 — нельзя получить, 0 — не опубликовано. */
+function appPrices(id){
+  if (STATIC) return staticGet("data/app/" + appShard(id) + ".json.gz").then(function(j){
+    // в шарде только рынки, где карточка есть: [номер рынка, available, номер валюты, price, msrp, номер налога]
+    var have = {};
+    (j.apps[id] || []).forEach(function(r){ have[j.markets[r[0]]] = r; });
+    return {app: null, rows: loadedMarkets().map(function(m){
+      var r = have[m];
+      if (!r) return {market: m, status: 0, currency: "", price: null, msrp: null, tax: ""};
+      var ok = !!r[1], pr = Number(r[3]) || 0, ms = Number(r[4]) || 0;
+      return {market: m, status: ok ? 2 : 1, currency: j.curs[r[2]] || "", price: ok ? pr : null, msrp: ok ? Math.max(pr, ms) : null, tax: j.taxes[r[5]] || ""};
+    })};
+  });
+  return apiGet("app?id=" + encodeURIComponent(id)).then(function(j){
+    return {app: j.app, rows: j.markets.map(function(r){
+      var ok = r[1] === 2, pr = Number(r[3]) || 0, ms = Number(r[4]) || 0;
+      return {market: r[0], status: r[1], currency: r[2] || "", price: ok ? pr : null, msrp: ok ? Math.max(pr, ms) : null, tax: r[5] || ""};
+    })};
+  });
+}
+var detailOnlyAvail = false;
+function renderDetail(){
+  var id = DETAIL_ID, idx = ID_INDEX.get(id), d = idx == null ? null : ROWS[idx], gen = ++detailGen;
+  if (!d){ closeDetail(); return; }
+  var m = curMarket();
+  var meta = [
+    ["Издатель", esc(d.publisher)],
+    ["Категории", esc(d._cats.join(", "))],
+    ["Рейтинг", d.rating > 0 ? '<span class="star">★</span> ' + d.rating.toFixed(1).replace(".", ",") + ' <span class="dim">(' + fmtInt.format(d.rating_count) + ')</span>' : '<span class="dim">нет оценок</span>'],
+    ["Цена в США", esc(d.display_price || (d.price > 0 ? "$" + d.price : "—")) + ' <span class="dim">(каталог)</span>'],
+    ["Обновлено", esc(d.last_update || "—") + (d.release_date ? ' <span class="dim">· выпуск ' + esc(d.release_date) + '</span>' : "")],
+    ["Размер", esc(humanSize(d.size_bytes) || "—")],
+    ["Языков", d.languages_count == null ? "—" : String(d.languages_count)],
+    ["ID", '<span class="num">' + esc(d.id) + '</span>']
+  ];
+  if (d._nm != null) meta.push(["По рынкам", "карточка в " + d._nl + ", доступно в " + d._nm + ", платно в " + d._np + (d._curs ? '<br><span class="dim">валюты: ' + esc(d._curs.replace(/;/g, ", ")) + '</span>' : "")]);
+  var links = ['<a href="' + esc(C.storeLink(d.id, m)) + '" target="_blank" rel="noopener">Карточка в Store (' + esc(m) + ')</a>'];
+  if (d.website) links.push('<a href="' + esc(d.website) + '" target="_blank" rel="noopener">Сайт</a>');
+  if (d.source_code_url) links.push('<a href="' + esc(d.source_code_url) + '" target="_blank" rel="noopener">Исходный код</a>');
+  var logo = logoSrc(d);
+  var html = '<div class="dhead">' + (logo ? '<img alt="" src="' + esc(logo) + '" onerror="this.style.visibility=\'hidden\'">' : '<div class="ph"></div>') +
+    '<div class="tt"><b>' + esc(d.title) + '</b><span class="dim">' + esc(d.product_type) + '</span></div><button type="button" id="dclose" aria-label="Закрыть">×</button></div>' +
+    (d.short_description ? '<p>' + esc(d.short_description) + '</p>' : '') +
+    '<div>' + links.join(" · ") + '</div>' +
+    '<dl>' + meta.map(function(x){ return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join("") + '</dl>' +
+    '<h4>Цены по странам <label><input type="checkbox" id="dOnly"' + (detailOnlyAvail ? " checked" : "") + '> только доступные</label></h4><div id="dprices" class="dim">Загрузка цен по рынкам…</div>';
+  var box = $("detail");
+  box.innerHTML = html;
+  $("dclose").onclick = closeDetail;
+  $("dOnly").onchange = function(){ detailOnlyAvail = this.checked; renderDetail(); };
+  appPrices(id).then(function(res){
+    if (gen !== detailGen) return;
+    var rows = res.rows, n = rows.length;
+    if (!rows.some(function(r){ return r.market === "US"; })) rows.push({market:"US", status:2, currency:"USD", price:d.price, msrp:d.price, tax:"TaxesNotIncluded", base:true});
+    var avail = rows.filter(function(r){ return r.status === 2 && !r.base; }).length;
+    if (detailOnlyAvail) rows = rows.filter(function(r){ return r.status === 2; });
+    rows.sort(function(a, b){ return (b.market === m) - (a.market === m) || mname(a.market).localeCompare(mname(b.market), "ru"); });
+    var left = MARKETS.length - n;
+    var t = '<div class="hint" style="margin:0 0 6px">Собранных рынков: ' + n + ', доступно в ' + avail + '.' +
+      (left > 0 ? " Ещё собирается рынков: " + left + "." : "") + ' Щелчок по строке — переключить страну.</div>' +
+      '<table class="ptab"><thead><tr><th>Страна</th><th class="r">Цена</th><th class="r">Скидка</th><th>Налог</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var go = r.market !== m && (isCollected(r.market) || r.market === "US");
+      var price = r.status === 2 ? (r.price === 0 ? '<span class="dim">Бесплатно</span>' : esc(money(r.price, r.currency))) : '<span class="' + MS_TEXT[r.status][1] + '">' + MS_TEXT[r.status][0] + '</span>';
+      var pct = r.status === 2 ? C.discountPct(r.price, r.msrp) : 0;
+      t += '<tr data-m="' + r.market + '" class="' + (r.market === m ? "curm" : "") + (go ? " go" : "") + '" title="' + esc(r.base ? "из каталога (рынок US ещё не собран)" : (r.status === 2 ? C.taxHint(r.tax) : MS_TEXT[r.status][2])) + '">' +
+        '<td class="cn">' + esc(mlabel(r.market)) + (r.base ? ' <span class="dim">(каталог)</span>' : "") + '</td><td class="r num">' + price + '</td>' +
+        '<td class="r">' + (pct > 0 ? '<span class="sale">−' + pct + '&nbsp;%</span><s class="dim num">' + esc(money(r.msrp, r.currency)) + '</s>' : "") + '</td>' +
+        '<td>' + (r.status === 2 ? esc(C.taxLabel(r.tax)) : "") + '</td></tr>';
+    });
+    t += '</tbody></table>';
+    $("dprices").className = "";
+    $("dprices").innerHTML = t;
+    $("dprices").onclick = function(e){ var tr = e.target.closest("tr.go"); if (!tr) return; state.market = tr.dataset.m; applyMarket(); };
+  }, function(err){
+    if (gen !== detailGen) return;
+    $("dprices").className = "bad";
+    $("dprices").innerHTML = "Цены по рынкам не загрузились: " + errText(err);
+  });
+}
+
+/* ---------- загрузка ---------- */
+function setProgress(frac){ $("progress").style.display = frac == null ? "none" : "block"; $("progress").firstChild.style.width = Math.round((frac || 0) * 100) + "%"; }
+function showEmpty(title, body, isErr){
+  $("empty").style.display = "";
+  $("emptyBox").className = "box" + (isErr ? " err" : "");
+  $("emptyBox").innerHTML = "<b>" + title + "</b>" + body + (isErr && location.protocol !== "file:" ? '<br><button type="button" id="retryBtn">Повторить</button>' : "");
+  if ($("retryBtn")) $("retryBtn").onclick = function(){ refreshMarkets(); loadApps(); };
+}
+
+/* Новые строки таблицы: индекс id -> позиция, затем цены выбранного рынка и сводка. */
+function onRowsReady(){
+  ID_INDEX = new Map();
+  ROWS.forEach(function(r, i){ ID_INDEX.set(r.id, i); });
+  MCACHE.clear(); EXTRA = null;
+  loadLogos();
+  if (DETAIL_ID && !ID_INDEX.has(DETAIL_ID)) closeDetail();
+  if (MARKETS.length) loadSummary();
+  applyMarket();
+}
+
+function loadApps(){
+  var t0 = performance.now();
+  showEmpty("Загрузка каталога…", STATIC ? "Каталог и цены загружаются с сайта — около 30 МБ при первом открытии." : "Данные берутся из msstore.db через локальный сервер <code>viewer_server.py</code>.");
+  $("status").textContent = "Загрузка каталога…"; setProgress(0);
+  apiGet("apps", function(f){ setProgress(f); $("status").textContent = "Загрузка каталога… " + Math.round(f * 100) + "%"; }).then(function(j){
+    var tNet = performance.now();
+    $("status").textContent = "Построение таблицы…";
+    setTimeout(function(){
+      var res = C.appsFromJson(j), rows = res.rows; j = null;
+      var tParsed = performance.now();
+      ROWS = rows;
+      totalCatCounts = new Map();
+      rows.forEach(function(r){ r._cats.forEach(function(c){ totalCatCounts.set(c, (totalCatCounts.get(c) || 0) + 1); }); });
+      catOrder = Array.from(totalCatCounts.keys()).sort(function(a, b){ return totalCatCounts.get(b) - totalCatCounts.get(a) || a.localeCompare(b); });
+      $("total").textContent = fmtInt.format(rows.length);
+      $("foundWrap").hidden = false;
+      $("empty").style.display = "none";
+      var after = function(){
+        var tDone = performance.now();
+        var secs = function(ms){ return (ms / 1000).toFixed(1).replace(".", ","); };
+        $("status").textContent = "Каталог: " + fmtInt.format(rows.length) + " приложений за " + secs(tDone - t0) + " с" +
+          (res.skipped ? ", пропущено битых: " + res.skipped : "") + (res.dups ? ", дублей: " + res.dups : "");
+        $("status").title = "загрузка " + secs(tNet - t0) + " с, разбор " + secs(tParsed - tNet) + " с, таблица " + secs(tDone - tParsed) + " с";
+        window.__loadStats = {rows: rows.length, skipped: res.skipped, dups: res.dups, netMs: tNet - t0, parseMs: tParsed - tNet, totalMs: tDone - t0};
+        setProgress(null);
+        ["resetBtn","colsBtn","expBtn"].forEach(function(id){ $(id).disabled = false; });
+        lastQ = null; stateToForm(); onRowsReady();
+      };
+      if (!table) createTable(rows, after);
+      else { table.replaceData(rows).then(after); }
+    }, 0);
+  }, function(err){
+    setProgress(null); console.warn(err);
+    $("status").textContent = "Каталог не загружен";
+    showEmpty(err && err.network ? "Сервер недоступен" : "Каталог не загрузился", errText(err), true);
+  });
+}
+
+function createTable(rows, cb){
+  table = new Tabulator("#table", {
+    data: rows, index: "id", height: "100%", layout: "fitColumns", rowHeight: 46,
+    renderVerticalBuffer: 400, columns: COLS, columnHeaderSortMulti: true, headerSortTristate: true,
+    placeholder: "Ничего не найдено", movableColumns: false, debugInvalidColumnDefinitions: false,
+    columnDefaults: {headerTooltip: true, resizable: true},
+    rowFormatter: function(row){ row.getElement().classList.toggle("cur", row.getData().id === DETAIL_ID); }
+  });
+  table.on("tableBuilt", function(){
+    table.setFilter(function(d){ return d._pass; });
+    tableReady = true;
+    table.on("dataSorted", function(sorters){
+      state.sort = sorters.map(function(s){ return {field: s.field, dir: s.dir}; });
+      writeHash();
+    });
+    table.on("rowClick", function(e, row){ if (e.target.closest("a")) return; openDetail(row.getData().id); });
+    cb();
+  });
+}
+
+buildMarketSelect();
+stateToForm();
+renderMarketUi();
+if (location.protocol === "file:" && !STATIC){
+  $("status").textContent = "Нужен сервер";
+  showEmpty("Страница открыта как файл", "Данные каталога и цены берутся из msstore.db через локальный сервер. В папке каталога выполните<br><code>python viewer_server.py</code><br>— браузер сам откроет страницу по адресу http://127.0.0.1:8765/.", true);
+} else {
+  refreshMarkets();
+  loadApps();
+  if (!STATIC) setInterval(refreshMarkets, 60000);   // на статике набор рынков не меняется
+}
+window.__viewer = {getTable: function(){ return table; }, getState: function(){ return state; }, openDetail: openDetail, refreshMarkets: refreshMarkets,
+  getMode: function(){ return {mode: MODE, market: curMarket(), loading: MLOADING, summary: SUMMARY_ON, summaryMarkets: SUMMARY_N, collected: loadedMarkets().length, err: MERR}; }};
+})();
+</script>
+</body>
+</html>
