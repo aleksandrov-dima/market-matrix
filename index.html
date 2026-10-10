@@ -159,7 +159,60 @@ mark{background:var(--mark);color:var(--mark-text);border-radius:2px;padding:0 1
 .tabulator .tabulator-placeholder .tabulator-placeholder-contents{color:var(--muted);font-size:14px;font-weight:400}
 .tabulator-tooltip{background:var(--panel);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);max-width:480px}
 .num{font-variant-numeric:tabular-nums}
+/* ---- спрос и идеи ---- */
+#demand{flex:none;border-bottom:1px solid var(--border);background:var(--panel);padding:8px 16px 10px;max-height:46vh;overflow:auto}
+#demand[hidden]{display:none}
+#demand.flash{animation:dmflash 1.6s ease-out 2}
+@keyframes dmflash{0%{box-shadow:inset 0 0 0 3px var(--accent)}100%{box-shadow:inset 0 0 0 3px transparent}}
+.dmh{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap}
+.dmh>b{font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.chips{display:inline-flex;gap:4px;flex-wrap:wrap}
+.chip{padding:1px 9px;border-radius:12px;font-size:12px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.lnkb{background:none;border:0;color:var(--accent);padding:0 4px;cursor:pointer}
+.lnkb:hover{text-decoration:underline}
+.helpb{width:24px;height:24px;border-radius:50%;padding:0;font-weight:700;line-height:1}
+.dmnote{color:var(--muted);font-size:12px;margin:6px 0 4px}
+.ntab{width:100%;border-collapse:collapse;font-size:12px}
+.ntab th{text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);padding:3px 6px;white-space:nowrap}
+.ntab td{padding:3px 6px;border-bottom:1px solid var(--border);white-space:nowrap}
+.ntab td:first-child{white-space:normal;min-width:180px}
+.ntab .r{text-align:right}
+.ntab tbody tr{cursor:pointer}
+.ntab tbody tr:hover td{background:var(--row-hover)}
+.dmsum{display:flex;flex-wrap:wrap;gap:8px 26px;margin:8px 0 6px}
+.st .sl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.st .sv{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.3}
+.st .ss{font-size:12px;color:var(--muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.verdict{margin:2px 0 6px}
+.vchip{display:inline-block;padding:1px 9px;border-radius:10px;margin:2px 4px 2px 0;background:var(--panel2);font-size:12px}
+.vchip.ok{background:color-mix(in srgb,var(--ok) 16%,var(--panel));color:var(--ok)}
+.vchip.bad{background:color-mix(in srgb,var(--danger) 14%,var(--panel));color:var(--danger)}
+.kchips{line-height:1.9}
+.kchip{font-size:12px;padding:0 8px;border-radius:10px;margin:0 2px}
+.kchip .num{color:var(--muted)}
+.kchip.off{text-decoration:line-through;opacity:.5}
+.spark{vertical-align:middle;overflow:visible}
+.spark polyline{fill:none;stroke:var(--accent);stroke-width:1.5}
+.spark .area{fill:var(--accent-soft);stroke:none}
+.up{color:var(--ok)} .down{color:var(--danger)}
+/* справка */
+#helpDlg{max-width:720px;width:calc(100vw - 32px);border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text);padding:0;box-shadow:var(--shadow)}
+#helpDlg::backdrop{background:rgba(10,15,25,.45)}
+#helpDlg .hd{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+#helpDlg .hd h2{font-size:16px;margin:0;flex:1}
+#helpDlg .bd{padding:6px 18px 14px;max-height:70vh;overflow:auto;line-height:1.5}
+#helpDlg h3{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 6px}
+#helpDlg ol,#helpDlg ul{padding-left:20px;margin:4px 0}
+#helpDlg li{margin:4px 0}
+#helpDlg dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:4px 0}
+#helpDlg dt{font-weight:600}
+#helpDlg dd{margin:0}
+#helpDlg code{background:var(--panel2);padding:0 4px;border-radius:4px}
+#helpDlg .ft{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--border)}
 @media (max-width:820px){
+  #demand{max-height:60vh}
+  .dmsum{gap:6px 16px}
   main{flex-direction:column}
   aside{width:auto;max-height:38vh;border-right:0;border-bottom:1px solid var(--border)}
   header,.searchbar{padding-left:16px;padding-right:16px}
@@ -171,13 +224,14 @@ mark{background:var(--mark);color:var(--mark-text);border-radius:2px;padding:0 1
 <body>
 <header>
   <h1>Каталог Store</h1>
-  <select id="market" title="Страна (рынок) Store: цены, доступность и ссылка на карточку"></select>
+  <select id="market" title="Страна (рынок) Store: цены, доступность, ссылка на карточку и спрос. Сверху — рынки, по которым собран спрос Google, по числу носителей языка; ниже — остальные по алфавиту"></select>
   <div class="menu" id="pricesMenu"><button id="pricesBtn">Рынки ▾</button><div class="dd">
     <button class="wide" id="mRefresh">Обновить список рынков</button>
     <div class="note" id="pInfo">Список рынков загружается…</div>
   </div></div>
   <div id="progress"><div></div></div>
   <span id="status">Загрузка…</span>
+  <button type="button" id="ideasHelp" title="Как искать идеи с помощью данных о спросе">Как искать идеи</button>
   <span class="spacer"></span>
   <span id="foundWrap" hidden>найдено <span id="found" class="num">0</span> из <span id="total" class="num">0</span></span>
   <button id="resetBtn" disabled>Сбросить</button>
@@ -258,12 +312,77 @@ mark{background:var(--mark);color:var(--mark-text);border-radius:2px;padding:0 1
     </div>
   </aside>
   <div class="tablewrap">
+    <section id="demand" hidden aria-label="Идеи и спрос"></section>
     <div id="mnote" hidden></div>
     <div id="table"></div>
     <div id="empty"><div class="box" id="emptyBox"><b>Загрузка каталога…</b>Данные берутся из msstore.db через локальный сервер <code>viewer_server.py</code>.</div></div>
   </div>
   <aside id="detail" hidden class="dpanel"></aside>
 </main>
+
+<dialog id="helpDlg" aria-labelledby="helpTitle">
+  <div class="hd"><h2 id="helpTitle">Как искать идеи для приложения</h2><button type="button" class="helpClose" aria-label="Закрыть">×</button></div>
+  <div class="bd">
+    <p>Над таблицей приложений — полоса, которая соединяет <b>спрос</b> (сколько людей ищут задачу в Google) с <b>предложением</b> (какие приложения уже есть в Store).</p>
+    <ul>
+      <li><b>Поиск пустой → «Идеи».</b> Список ниш выбранного рынка с пресетами: «Слабые лидеры», «Пустые ниши», «Растут», «Платят», «Все по Score».</li>
+      <li><b>Поиск задан → «Спрос».</b> Сводка спроса по запросу, автоматический вывод и ключи; таблица ниже — конкуренты по тому же запросу.</li>
+    </ul>
+
+    <h3>Пример: идея «окно поверх других окон» (аналог WindowTop)</h3>
+    <ol>
+      <li>Рынок <b>US</b>, в поиске <code>"always on top"</code> (кнопка «Пример проверки идеи» внизу) — в кавычках, чтобы и спрос, и конкуренты искались точной фразой (без кавычек каталог ищет слова по отдельности, и <code>top</code> найдёт «Desktop»). Всё подставится само.</li>
+      <li>Полоса «Спрос»: около <b>1,8 тыс.</b> запросов в месяц по ключам с этой фразой (<code>always on top windows 11</code>, <code>powertoys always on top</code>…), за год −24%, CPC $0 — за эту тему никто не платит рекламе.</li>
+      <li>Вывод собирается автоматически: «спрос средний», «спрос падает», «за рекламу почти не платят»; Score — средний для рынка.</li>
+      <li>Ключи под сводкой: лишние (например, <code>always on top mac</code>) щелчком исключаются из суммы.</li>
+      <li>Таблица — конкуренты с этой фразой в названии или описании (около 30); отсортируйте по «Оценок». Лидер рынка <b>WindowTop</b> (★4,8, 685 оценок, $21,99) сюда не попал — в описании у него «set the window on top»: найдите его запросом <code>windowtop</code>. Конкурентов ищите несколькими формулировками. Щелчок по строке — карточка с ценами по всем странам.</li>
+      <li>Попробуйте синонимы: <code>keep window on top</code>, <code>pin window</code>, <code>ontopreplica</code> — спрос ниши складывается из нескольких формулировок.</li>
+      <li>Итог примера: ниша маленькая и сужается, лидер сильный, а бесплатный Microsoft PowerToys закрывает основу задачи. Для сравнения откройте пресет «Слабые лидеры» при пустом поиске — там ниши с Score в разы выше.</li>
+    </ol>
+
+    <h3>Какую идею искать</h3>
+    <p>Цель — ниша, где все метки вывода зелёные: спрос большой и не падает, за рекламу платят (значит, аудитория чего-то стоит), лидеры в Store слабые, Score в верхних 30% рынка. Для этого есть пресет <b>«Всё зелёное»</b>: в нём только ниши, где приложения в Store уже есть, но слабые, — спрос именно на программу подтверждён, а обойти лидеров реально.</p>
+    <p>«Пустые ниши» (приложений нет) — не то же самое: наверху там чаще бренды и веб-сервисы (<code>xe currency converter</code>, <code>desmos calculator</code>), которые закрывают спрос без приложения. Их стоит проверять вручную.</p>
+
+    <h3>Пример 2: поиск идеи</h3>
+    <ol>
+      <li>Рынок <b>US</b>, поиск пустой, пресет <b>«Всё зелёное»</b>. Можно нажать «Пример поиска идеи» внизу.</li>
+      <li>В списке, например, <code>voice recorder with transcription</code>: около 22 тыс. запросов в месяц, +83% за год, CPC около $8, в каталоге одно подходящее приложение и почти без оценок.</li>
+      <li>Щелчок по строке: полоса покажет спрос по нише, таблица — конкурентов, отсортированных по числу оценок. Точной фразы нет ни в одном листинге, поэтому запрос подставится словами: <code>voice recorder transcription</code>. Проверьте синонимы (<code>"transcription app"</code>, <code>"speech to text"</code>) — ниша обычно шире одной формулировки.</li>
+      <li>Вернуться к списку идей — кнопка «← к идеям» на полосе или «Назад» в браузере.</li>
+      <li>Дальше — вручную: что предлагают конкуренты, почему у них мало оценок, нужен ли для задачи именно Windows.</li>
+    </ol>
+
+    <h3>Поиск идей</h3>
+    <ol>
+      <li>Очистите поиск, выберите рынок и пресет: «Всё зелёное» — главный кандидат, «Слабые лидеры» — шире, без условий на тренд и рекламу.</li>
+      <li>Щёлкните по нише — она станет запросом: в кавычках (точная фраза), а если фразы нет ни в одном листинге — значимыми словами. Увидите её спрос и конкурентов, отсортированных по числу оценок. «← к идеям» возвращает список с прежним пресетом и сортировкой; «Сбросить» в шапке очищает всё, включая фильтры слева.</li>
+      <li>На неанглийских рынках ключи местные (<span class="dim">≈</span> — английский эквивалент): запрос подставляется по-английски, потому что листинги в каталоге английские, а спрос показывается по местным ключам.</li>
+    </ol>
+
+    <h3>Что означают цифры</h3>
+    <dl>
+      <dt>Запр./мес</dt><dd>Среднее число поисков в Google за 12 месяцев (Google Keyword Planner, округлено корзинами).</dd>
+      <dt>Тренд</dt><dd>Последние 3 месяца к среднему за год: ≥ 1,2 — растёт, ≤ 0,8 — падает.</dd>
+      <dt>CPC</dt><dd>Сколько рекламодатели платят за клик (80-й перцентиль). Около $0 — коммерческой ценности почти нет; от $2 — за аудиторию платят.</dd>
+      <dt>Оценок топ-5</dt><dd>Сумма оценок у 5 самых оценённых приложений каталога со словами ключа: &lt; 500 — лидеры слабые, &gt; 20 000 — ниша занята.</dd>
+      <dt>Score</dt><dd>Сводная оценка ниши: спрос × готовность платить × слабость лидеров / сила конкурентов. Перцентиль — какая доля ниш рынка ниже.</dd>
+      <dt>≈</dt><dd>Конкуренты подобраны по английскому эквиваленту местного ключа.</dd>
+    </dl>
+
+    <h3>Ограничения</h3>
+    <ul>
+      <li>Спрос — это поиск в Google, а не в Store: частотность поиска в Store Microsoft не публикует. Это прокси, а не прогноз установок.</li>
+      <li>Данные собраны по ~600 типовым задачам (англ.) и ~170 переведённым; ниш вне этого списка может не быть — проверку произвольных идей добавим позже.</li>
+      <li>Спрос: <code>"фраза в кавычках"</code> и запрос со служебными словами (<code>always on top</code>, <code>picture in picture</code>) ищутся в ключах целиком как фраза, остальные запросы — каждое слово целым словом в любом порядке. Совпадение текстовое: <code>pin window</code> найдёт и «resetting pin windows 10». Лишние ключи исключайте щелчком.</li>
+    </ul>
+
+    <h3>Свежесть данных</h3>
+    <dl id="helpDates"><dt>Каталог и цены</dt><dd>—</dd></dl>
+    <p class="dim">Спрос Google обновляется помесячно; каталог и цены — снимок на дату сбора: приложения, цены и оценки с тех пор могли измениться.</p>
+  </div>
+  <div class="ft"><button type="button" id="helpExample2">Пример поиска идеи</button><button type="button" id="helpExample" class="primary">Пример проверки идеи</button><button type="button" class="helpClose">Закрыть</button></div>
+</dialog>
 
 <!-- ===== Pure logic (no DOM). Extracted and unit-tested with node. ===== -->
 <script id="core">
@@ -336,7 +455,7 @@ function parseQuery(q){
     text = s(text).toLowerCase();
     if (!quoted) text = text.trim();
     if (text === "" || text === "-") continue;
-    tokens.push({neg:neg, field:field, text:text});
+    tokens.push({neg:neg, field:field, text:text, quoted:quoted});
   }
   // group: AND of OR-groups
   var groups = [], cur = null, pendingOr = false;
@@ -388,7 +507,7 @@ function highlightTerms(pq, scope){
 
 var DEFAULT_STATE = {q:"", scope:"all", cats:[], price:"any", pmin:"", pmax:"", rmin:"", rcmin:"", rated:false,
   dfrom:"", dto:"", dlmin:"", dlmax:"", lcmin:"", lcmax:"", src:false, site:false, kind:"all", sort:[], cols:null,
-  market:"US", avail:false, nmmin:""};
+  market:"US", avail:false, nmmin:"", np:"green", nx:""};
 
 /* Цена берётся из r.pp — цены выбранного рынка (null = в рынке не опубликовано/недоступно/нет данных). */
 function compileFilters(st){
@@ -568,10 +687,105 @@ function currencySymbol(cur){
 function storeLink(id, market){ return "https://apps.microsoft.com/detail/" + encodeURIComponent(id) + "?hl=ru-RU&gl=" + encodeURIComponent(market || "US"); }
 function discountPct(price, msrp){ return msrp > price && msrp > 0 ? Math.round((1 - price / msrp) * 100) : 0; }
 
+/* ---- спрос: keyword_ingest.py export → niches-data/XX.json.gz (data/niches/ на сайте) ---- */
+function nichesFromJson(j){
+  var c = {}; j.cols.forEach(function(k, i){ c[k] = i; });
+  var rows = j.rows.map(function(r){
+    return {keyword: s(r[c.keyword]), volume: r[c.volume] || 0, cpc: r[c.high_bid] || 0, comp: r[c.competition_index] || 0,
+      trend: r[c.trend], apps: r[c.apps] || 0, titleApps: r[c.title_apps] || 0, top5: r[c.top5_ratings] || 0,
+      top5avg: r[c.top5_avg_rating], paid: r[c.paid_share], price: r[c.median_price], cur: s(r[c.currency]),
+      score: r[c.opportunity] || 0, variants: r[c.variants] || 1, intent: !!r[c.intent], monthly: r[c.monthly] || [],
+      top: r[c.top] || [], via: s(r[c.via]), _h: (s(r[c.keyword]) + "\n" + s(r[c.via])).toLowerCase()};
+  });
+  var scores = rows.filter(function(r){ return r.intent; }).map(function(r){ return r.score; }).sort(function(a, b){ return a - b; });
+  rows.forEach(function(r){
+    var m = r.monthly;
+    r.pct = percentile(scores, r.score);
+    r.yoy = m.length >= 12 && m[0] ? m[m.length - 1] / m[0] - 1 : null;
+  });
+  return {geo: j.geo, lang: j.lang, fetched: s(j.fetched), months: j.months || [], rows: rows, scores: scores};
+}
+/* Доля значений в sorted (по возрастанию) меньше v, %. */
+function percentile(sorted, v){
+  if (!sorted.length) return null;
+  var lo = 0, hi = sorted.length;
+  while (lo < hi){ var mid = (lo + hi) >> 1; if (sorted[mid] < v) lo = mid + 1; else hi = mid; }
+  return Math.round(100 * lo / sorted.length);
+}
+/* Слово (или фраза) целиком для алфавитных языков: «pin» не находит «spin» и «pinning», но находит «pins»/«windows»
+   (окончания -s/-es); для иероглифов и прочих письменностей без пробелов — подстрока. */
+var LETTER = /[0-9a-zа-яёÀ-ɏ]/i;
+function hasWord(hay, w){
+  if (!/^[0-9a-zа-яёÀ-ɏ]/i.test(w)) return hay.indexOf(w) >= 0;
+  for (var i = hay.indexOf(w); i >= 0; i = hay.indexOf(w, i + 1)){
+    if (i > 0 && LETTER.test(hay.charAt(i - 1))) continue;
+    var rest = hay.slice(i + w.length, i + w.length + 3);
+    if (!LETTER.test(rest.charAt(0)) || /^s(?![0-9a-z])/i.test(rest) || /^es(?![0-9a-z])/i.test(rest)) return true;
+  }
+  return false;
+}
+/* Служебные слова: в запросе без кавычек к спросу не относятся («picture in picture» → picture). */
+var STOPWORDS = new Set("a an and the for of to in on with by from at or as is it my your de la le les des du el los las en et y o e da do para con und der die das mit für".split(" "));
+/* Ключ спроса подходит под запрос каталога: «фраза в кавычках» — целиком, слова без кавычек — каждое целым словом (служебные
+   пропускаются), -слово и OR — как в каталоге. Ищется в ключе и в его английском эквиваленте (via).
+   publisher:/category:/desc: к спросу не относятся: запрос только из них ничего не находит. */
+function nicheMatch(n, pq){
+  if (!pq || pq.empty) return true;
+  var gs = pq.groups, used = false;
+  // простые слова со служебными («picture in picture», «always on top») — это фраза: ищется целиком
+  if (gs.every(function(g){ return g.length === 1 && !g[0].neg && !g[0].quoted && (!g[0].field || g[0].field === "title"); }) &&
+      gs.some(function(g){ return STOPWORDS.has(g[0].text); }))
+    return hasWord(n._h, gs.map(function(g){ return g[0].text; }).join(" "));
+  for (var i = 0; i < gs.length; i++){
+    var g = gs[i], any = false, rel = false;
+    for (var j = 0; j < g.length; j++){
+      var t = g[j];
+      if (t.field && t.field !== "title") continue;
+      if (!t.quoted && !t.neg && STOPWORDS.has(t.text)) continue;
+      rel = true;
+      var hit = hasWord(n._h, t.text);
+      if (t.neg ? !hit : hit){ any = true; break; }
+    }
+    if (rel){ used = true; if (!any) return false; }
+  }
+  return used;
+}
+/* Сводка по набору ключей: сумма частотности, помесячно, тренд, CPC (взвешенный частотностью), лучший по Score. */
+function demandSummary(rows){
+  var vol = 0, cpcW = 0, best = null, m = null;
+  rows.forEach(function(r){
+    vol += r.volume; cpcW += r.cpc * r.volume;
+    if (!best || r.score > best.score) best = r;
+    if (r.monthly && r.monthly.length){
+      if (!m) m = r.monthly.map(function(){ return 0; });
+      for (var k = 0; k < m.length && k < r.monthly.length; k++) m[k] += r.monthly[k] || 0;
+    }
+  });
+  m = m || [];
+  var sum = function(a){ return a.reduce(function(x, y){ return x + y; }, 0); };
+  var tot = sum(m), trend = m.length >= 6 && tot ? (sum(m.slice(-3)) / 3) / (tot / m.length) : null;
+  var yoy = m.length >= 12 && m[0] ? m[m.length - 1] / m[0] - 1 : null;
+  return {count: rows.length, volume: vol, cpc: vol ? cpcW / vol : 0, best: best, monthly: m, trend: trend, yoy: yoy};
+}
+/* Короткий вывод: [{t: текст, cls: ok|bad|""}]. comp — конкуренты из таблицы каталога: {count, top5}. */
+function demandVerdict(S, comp, pct){
+  var v = [];
+  v.push(S.volume < 1000 ? {t: "спрос малый", cls: "bad"} : S.volume < 10000 ? {t: "спрос средний", cls: ""} : {t: "спрос большой", cls: "ok"});
+  var down = (S.trend != null && S.trend < 0.85) || (S.yoy != null && S.yoy < -0.15);
+  var up = (S.trend != null && S.trend > 1.15) || (S.yoy != null && S.yoy > 0.15);
+  v.push(down && !up ? {t: "спрос падает", cls: "bad"} : up && !down ? {t: "спрос растёт", cls: "ok"} : {t: "спрос стабилен", cls: ""});
+  v.push(S.cpc < 0.3 ? {t: "за рекламу почти не платят", cls: "bad"} : S.cpc >= 2 ? {t: "за рекламу платят", cls: "ok"} : {t: "реклама дешёвая", cls: ""});
+  if (comp) v.push(comp.count === 0 ? {t: "в каталоге нет приложений по запросу", cls: "ok"} : comp.top5 < 500 ? {t: "лидеры в Store слабые", cls: "ok"}
+    : comp.top5 > 20000 ? {t: "ниша в Store занята", cls: "bad"} : {t: "конкуренция в Store средняя", cls: ""});
+  if (pct != null) v.push(pct >= 70 ? {t: "Score в верхних 30% рынка", cls: "ok"} : pct < 20 ? {t: "Score в нижних 20% рынка", cls: "bad"} : {t: "Score средний для рынка", cls: ""});
+  return v;
+}
+
 global.Core = {CSV_COLUMNS:CSV_COLUMNS, DEFAULT_STATE:DEFAULT_STATE, prepRow:prepRow, parseQuery:parseQuery, matchQuery:matchQuery,
   highlightTerms:highlightTerms, compileFilters:compileFilters, applyFilters:applyFilters, stateToHash:stateToHash, hashToState:hashToState,
   highlight:highlight, escHtml:escHtml, toNum:toNum,
-  taxLabel:taxLabel, taxHint:taxHint, appsFromJson:appsFromJson, marketFromJson:marketFromJson, fmtMoney:fmtMoney, currencySymbol:currencySymbol, storeLink:storeLink, discountPct:discountPct};
+  taxLabel:taxLabel, taxHint:taxHint, appsFromJson:appsFromJson, marketFromJson:marketFromJson, fmtMoney:fmtMoney, currencySymbol:currencySymbol, storeLink:storeLink, discountPct:discountPct,
+  nichesFromJson:nichesFromJson, percentile:percentile, hasWord:hasWord, nicheMatch:nicheMatch, STOPWORDS:STOPWORDS, demandSummary:demandSummary, demandVerdict:demandVerdict};
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
 
@@ -804,7 +1018,10 @@ function runFilter(forceRedraw){
   formToState();
   if (!tableReady){ writeHash(); return; }
   var qChanged = state.q !== lastQ || state.scope !== lastScope;
-  if (qChanged){ PQ = C.parseQuery(state.q); HL = C.highlightTerms(PQ, state.scope); lastQ = state.q; lastScope = state.scope; }
+  if (qChanged){
+    if (lastQ !== null && state.q !== lastQ){ state.nx = ""; NEXP = false; }   // исключённые ключи относятся к прежнему запросу
+    PQ = C.parseQuery(state.q); HL = C.highlightTerms(PQ, state.scope); lastQ = state.q; lastScope = state.scope;
+  }
   var t0 = performance.now();
   var res = C.applyFilters(ROWS, state, PQ);
   table.refreshFilter();
@@ -813,6 +1030,7 @@ function runFilter(forceRedraw){
   renderCats(res.catCounts);
   $("resetBtn").disabled = C.stateToHash(Object.assign({}, state, {sort:[], cols:null, market:"US"})) === "";
   writeHash();
+  renderDemand();
   window.__lastFilterMs = performance.now() - t0;
   window.__lastCount = res.count;
 }
@@ -977,14 +1195,26 @@ function buildMarketSelect(){
   var byName = function(a, b){ return mname(a).localeCompare(mname(b), "ru"); };
   var opt = function(m, extra, off){ return '<option value="' + m + '"' + (off && m !== cur ? " disabled" : "") + '>' + esc(mlabel(m) + (extra || "")) + '</option>'; };
   if (!MARKETS.length){ sel.innerHTML = opt(cur, cur === "US" ? " (каталог)" : ""); sel.value = cur; return; }
-  var others = MARKETS.filter(function(m){ return m !== "US"; });
+  // сначала рынки, по которым собран спрос, — по числу носителей языка (LANG_RANK), затем остальные по алфавиту
+  var dem = NIDX ? Object.keys(NIDX).filter(function(m){ return MINFO[m]; }).sort(function(a, b){
+    return langRank(NIDX[a].lang) - langRank(NIDX[b].lang) || (b === "US") - (a === "US") || byName(a, b); }) : [];
+  var others = MARKETS.filter(function(m){ return dem.indexOf(m) < 0 && (dem.length || m !== "US"); });
   var ready = others.filter(isCollected).sort(byName), rest = others.filter(function(m){ return !isCollected(m); }).sort(byName);
-  sel.innerHTML = '<optgroup label="Собрано: ' + n + ' из ' + MARKETS.length + '">' + opt("US", isCollected("US") ? "" : " (каталог)") +
+  sel.innerHTML = (dem.length ? '<optgroup label="Со спросом — по числу носителей языка">' + dem.map(function(m, i){
+        return '<option value="' + m + '">' + esc((i + 1) + ". " + langName(NIDX[m].lang) + " — " + mlabel(m)) + '</option>'; }).join("") + '</optgroup>' : "") +
+    '<optgroup label="' + (dem.length ? "Без данных о спросе · " : "") + 'собрано: ' + n + ' из ' + MARKETS.length + '">' + (dem.length ? "" : opt("US", isCollected("US") ? "" : " (каталог)")) +
       ready.map(function(m){ return opt(m); }).join("") + '</optgroup>' +
     (rest.length ? '<optgroup label="Ещё собирается (' + rest.length + ')">' + rest.map(function(m){ return opt(m, " · ещё собирается", true); }).join("") + '</optgroup>' : "");
   sel.value = cur;
 }
 $("market").addEventListener("change", function(){ state.market = this.value; applyMarket(); });
+/* Языки рынков со спросом по числу носителей (родной язык, по Ethnologue): китайский, испанский, английский, арабский, хинди,
+   португальский, русский, японский, немецкий, французский. */
+var LANG_RANK = ["zh-tw", "es", "en", "ar", "hi", "pt", "ru", "ja", "de", "fr"];
+var LANG_NAME = {"zh-tw": "китайский", es: "испанский", en: "английский", ar: "арабский", hi: "хинди", pt: "португальский",
+  ru: "русский", ja: "японский", de: "немецкий", fr: "французский"};
+function langRank(l){ var i = LANG_RANK.indexOf(l); return i < 0 ? 99 : i; }
+function langName(l){ return LANG_NAME[l] || l; }
 
 /* Цены рынка из /api/prices; кэш по (рынок, время сбора) — пересобранный рынок загрузится заново. */
 function getMarketData(m){
@@ -1229,6 +1459,216 @@ function renderDetail(){
   });
 }
 
+/* ---------- спрос и идеи ----------
+   niches-data/ (сервер: /niches/…, сайт: data/niches/…): index.json — рынки со спросом, XX.json.gz — ключи рынка.
+   Пустой поиск — «Идеи» (ниши по пресету), иначе — «Спрос» по запросу; конкуренты — строки каталога под фильтром. */
+var NIDX = null, NIDX_ERR = "", NCACHE = new Map(), NEXP = false, IDEAS_N = 12;
+var DEM_KEY = "msstore-demand-collapsed";
+var PRESETS = [
+  {id: "green", name: "Всё зелёное", hint: "Все метки вывода зелёные: от 1 000 запросов в месяц, спрос не падает, CPC от $2, приложения в Store есть, но у топ-5 меньше 500 оценок, Score в верхних 30% рынка",
+    f: function(r){ return r.intent && r.volume >= 1000 && r.cpc >= 2 && r.apps > 0 && r.top5 < 500 && r.pct >= 70 &&
+      !((r.trend != null && r.trend < 0.85) || (r.yoy != null && r.yoy < -0.15)); }, by: "score"},
+  {id: "weak", name: "Слабые лидеры", hint: "Ищут программу, приложения есть, но у топ-5 в сумме не больше 1 000 оценок; от 1 000 запросов в месяц",
+    f: function(r){ return r.intent && r.apps > 0 && r.top5 <= 1000 && r.volume >= 1000; }, by: "score"},
+  {id: "empty", name: "Пустые ниши", hint: "Ищут программу, а подходящих приложений в каталоге нет; от 500 запросов в месяц",
+    f: function(r){ return r.intent && r.apps === 0 && r.volume >= 500; }, by: "volume"},
+  {id: "growing", name: "Растут", hint: "Последние 3 месяца не меньше 1,3 от среднего за год; от 500 запросов в месяц",
+    f: function(r){ return r.intent && r.trend != null && r.trend >= 1.3 && r.volume >= 500; }, by: "score"},
+  {id: "paid", name: "Платят", hint: "Не меньше 30% платных среди совпавших приложений (минимум 3); от 500 запросов в месяц",
+    f: function(r){ return r.intent && r.apps >= 3 && r.paid != null && r.paid >= 0.3 && r.volume >= 500; }, by: "score"},
+  {id: "all", name: "Все по Score", hint: "Все ключи, где ищут программу, по убыванию Score", f: function(r){ return r.intent; }, by: "score"}
+];
+function nichesPath(name){ return (STATIC ? "data/niches/" : "niches/") + name; }
+function loadNicheIndex(){
+  staticGet(nichesPath("index.json")).then(function(j){ NIDX = j || {}; NIDX_ERR = ""; buildMarketSelect(); renderDemand(); },
+    function(err){ NIDX = {}; NIDX_ERR = err && err.status === 404 ? "" : errText(err); renderDemand(); });
+}
+/* Данные рынка: {loading} пока грузится, затем {data} или {err}; при готовности — перерисовка полосы. */
+function nicheData(m){
+  var e = NIDX && NIDX[m];
+  if (!e) return null;
+  var key = m + "|" + e.fetched, c = NCACHE.get(key);
+  if (c) return c;
+  c = {loading: true}; NCACHE.set(key, c);
+  staticGet(nichesPath(m + ".json.gz")).then(function(j){ c.loading = false; c.data = C.nichesFromJson(j); renderDemand(); },
+    function(err){ c.loading = false; c.err = errText(err); NCACHE.delete(key); renderDemand(); });
+  while (NCACHE.size > 4) NCACHE.delete(NCACHE.keys().next().value);
+  return c;
+}
+function demandCollapsed(){ try { return localStorage.getItem(DEM_KEY) === "1"; } catch (e){ return false; } }
+function num1(v){ return v.toFixed(1).replace(".", ","); }
+function sparkSvg(m, w, h, months){
+  if (!m || m.length < 2) return '<span class="dim">—</span>';
+  var max = Math.max.apply(null, m) || 1, pts = m.map(function(v, i){ return (i / (m.length - 1) * w).toFixed(1) + "," + (h - 1 - v / max * (h - 3)).toFixed(1); });
+  var tip = months && months.length === m.length ? m.map(function(v, i){ return months[i] + ": " + fmtInt.format(v); }).join("\n") : "";
+  return '<svg class="spark" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' + (tip ? '<title>' + esc(tip) + '</title>' : "") +
+    '<polygon class="area" points="0,' + h + ' ' + pts.join(" ") + ' ' + w + ',' + h + '"/><polyline points="' + pts.join(" ") + '"/></svg>';
+}
+function trendHtml(t){
+  if (t == null) return '<span class="dim">—</span>';
+  return '<span class="' + (t >= 1.2 ? "up" : t <= 0.8 ? "down" : "") + '">' + (t >= 1.2 ? "↑ " : t <= 0.8 ? "↓ " : "") + t.toFixed(2).replace(".", ",") + '</span>';
+}
+function stat(label, value, sub, title){
+  return '<div class="st"' + (title ? ' title="' + esc(title) + '"' : "") + '><div class="sl">' + label + '</div><div class="sv">' + value + '</div>' + (sub ? '<div class="ss">' + sub + '</div>' : "") + '</div>';
+}
+/* Конкуренты — строки каталога, прошедшие фильтр (поиск + фильтры слева): число и топ-5 по оценкам. */
+function competitors(){
+  var top = [], n = 0;
+  for (var i = 0; i < ROWS.length; i++){
+    var r = ROWS[i];
+    if (!r._pass) continue;
+    n++;
+    if (top.length < 5 || r.rating_count > top[top.length - 1].rating_count){
+      top.push(r); top.sort(function(a, b){ return b.rating_count - a.rating_count; });
+      if (top.length > 5) top.pop();
+    }
+  }
+  return {count: n, top5: top.reduce(function(a, r){ return a + r.rating_count; }, 0), top: top};
+}
+function ideasHtml(D){
+  var p = PRESETS.filter(function(x){ return x.id === state.np; })[0] || PRESETS[0];
+  var list = D.rows.filter(p.f);
+  list.sort(p.by === "volume" ? function(a, b){ return b.volume - a.volume; } : function(a, b){ return b.score - a.score; });
+  var chips = PRESETS.map(function(x){ return '<button type="button" class="chip' + (x === p ? " on" : "") + '" data-np="' + x.id + '" title="' + esc(x.hint) + '">' + esc(x.name) + '</button>'; }).join("");
+  var n = Math.min(list.length, IDEAS_N);
+  var html = '<div class="dmnote">' + esc(p.hint) + '. Ниш: ' + fmtInt.format(list.length) + '. Щелчок по строке — спрос по нише и конкуренты в таблице ниже.</div>';
+  if (!list.length) return {head: '<span class="chips">' + chips + '</span>', html: html + '<div class="dmnote">На этом рынке под условия пресета ниш нет — попробуйте «Слабые лидеры» или «Все по Score».</div>'};
+  html += '<table class="ntab"><thead><tr><th>Ниша — ключ Google</th><th class="r">Запр./мес</th><th>12 мес.</th><th class="r">Тренд</th>' +
+    '<th class="r" title="Ставка рекламы за клик, 80-й перцентиль">CPC</th><th class="r" title="Приложений каталога со словами ключа">Прил.</th>' +
+    '<th class="r" title="Сумма оценок у 5 самых оценённых приложений">Оценок топ-5</th><th class="r" title="Средний рейтинг топ-5">★</th>' +
+    '<th class="r" title="Доля платных среди совпавших приложений">Платных</th><th class="r" title="Сводная оценка ниши">Score</th></tr></thead><tbody>';
+  for (var i = 0; i < n; i++){
+    var r = list[i];
+    html += '<tr data-q="' + esc(r.via || r.keyword) + '" title="' + esc(r.via ? "Конкуренты в каталоге — по английскому эквиваленту «" + r.via + "»" : "Найти конкурентов в каталоге") + '">' +
+      '<td>' + esc(r.keyword) + (r.via ? ' <span class="dim">≈ ' + esc(r.via) + '</span>' : "") + '</td>' +
+      '<td class="r num">' + fmtInt.format(r.volume) + '</td><td>' + sparkSvg(r.monthly, 72, 18, D.months) + '</td><td class="r">' + trendHtml(r.trend) + '</td>' +
+      '<td class="r num">' + (r.cpc ? "$" + r.cpc.toFixed(2) : "—") + '</td><td class="r num">' + fmtInt.format(r.apps) + '</td>' +
+      '<td class="r num ' + (r.top5 < 500 ? "ok" : r.top5 > 20000 ? "bad" : "") + '">' + fmtInt.format(r.top5) + '</td>' +
+      '<td class="r num">' + (r.top5avg ? num1(r.top5avg) : "—") + '</td>' +
+      '<td class="r num">' + (r.paid == null ? "—" : Math.round(r.paid * 100) + "%") + '</td><td class="r num">' + num1(r.score) + '</td></tr>';
+  }
+  html += '</tbody></table>';
+  if (list.length > n) html += '<button type="button" class="lnkb" id="dmMore">показать ещё ' + Math.min(24, list.length - n) + '</button>';
+  return {head: '<span class="chips">' + chips + '</span>', html: html};
+}
+function queryDemandHtml(D){
+  var nx = new Set(state.nx ? state.nx.split("|") : []);
+  var rows = D.rows.filter(function(r){ return C.nicheMatch(r, PQ); }).sort(function(a, b){ return b.volume - a.volume; });
+  var head = '<span class="dim">по запросу «' + esc(state.q) + '»</span>';
+  if (!rows.length) return {head: head, html: '<div class="dmnote">В собранных данных о спросе ключей с этими словами нет. Попробуйте синонимы или более общий запрос' +
+    (D.lang !== "en" ? "; на этом рынке ищется и по английским эквивалентам местных ключей" : "") +
+    '. Данные собраны по типовым задачам, проверку произвольной идеи с запросом в Google добавим позже. Таблица ниже — конкуренты по запросу.</div>'};
+  var inc = rows.filter(function(r){ return !nx.has(r.keyword); });
+  var S = C.demandSummary(inc), pct = S.best ? C.percentile(D.scores, S.best.score) : null, comp = competitors();
+  var v = C.demandVerdict(S, comp, pct);
+  var leaders = comp.top.slice(0, 2).map(function(r){ return esc(r.title) + " ★" + (r.rating ? num1(r.rating) : "—") + " (" + fmtInt.format(r.rating_count) + ")"; }).join(", ");
+  var html = '<div class="dmsum">' +
+    stat("Запросов в месяц", fmtInt.format(S.volume), inc.length + " из " + rows.length + " ключей", "Сумма средней частотности ключей за 12 месяцев") +
+    stat("За 12 месяцев", sparkSvg(S.monthly, 150, 32, D.months), S.yoy == null ? "" : (S.yoy >= 0 ? "+" : "−") + Math.abs(Math.round(S.yoy * 100)) + "% к прошлому году", "Сумма по месяцам; наведите на график") +
+    stat("Тренд", trendHtml(S.trend), "3 последних мес. к среднему", "≥ 1,2 — растёт, ≤ 0,8 — падает") +
+    stat("CPC", S.cpc ? "$" + S.cpc.toFixed(2) : "$0", "средний, по частотности", "Сколько рекламодатели платят за клик") +
+    stat("Score", S.best ? num1(S.best.score) : "—", pct == null ? "" : "выше, чем у " + pct + "% ниш рынка", S.best ? "Лучший ключ: " + S.best.keyword : "") +
+    stat("Конкурентов в таблице", fmtInt.format(comp.count), leaders || "—", "Строки каталога под текущим поиском и фильтрами; топ по числу оценок") +
+    '</div><div class="verdict">' + v.map(function(x){ return '<span class="vchip ' + x.cls + '">' + esc(x.t) + '</span>'; }).join("") + '</div>';
+  var lim = NEXP ? 300 : 16;
+  html += '<div class="kchips"><span class="dim">Ключи (щелчок — исключить из суммы):</span> ' + rows.slice(0, lim).map(function(r){
+    return '<button type="button" class="kchip' + (nx.has(r.keyword) ? " off" : "") + '" data-kx="' + esc(r.keyword) + '" title="' +
+      esc((r.via ? "≈ " + r.via + " · " : "") + "Score " + num1(r.score) + (r.cpc ? " · CPC $" + r.cpc : "") + (r.trend != null ? " · тренд " + r.trend : "")) + '">' +
+      esc(r.keyword) + ' <span class="num">' + fmtInt.format(r.volume) + '</span></button>'; }).join("") +
+    (rows.length > lim ? ' <button type="button" class="lnkb" id="dmAll">ещё ' + fmtInt.format(rows.length - lim) + '</button>' : "") +
+    (nx.size ? ' <button type="button" class="lnkb" id="dmNxClear">вернуть исключённые (' + nx.size + ')</button>' : "") + '</div>';
+  return {head: head, html: html};
+}
+/* Клик по нише: прежнее состояние — в историю браузера («Назад» вернёт список), конкуренты — по убыванию оценок. */
+var BACK = null;
+function openNiche(phrase){
+  BACK = {sort: (state.sort || []).slice(), n: IDEAS_N, top: $("demand").scrollTop};
+  history.pushState(null, "", location.href);
+  var q = '"' + phrase + '"', pq = C.parseQuery(q), scope = $("scope").value, hit = false;
+  for (var i = 0; i < ROWS.length && !hit; i++) hit = C.matchQuery(ROWS[i], pq, scope);
+  if (!hit){   // точной фразы нет ни у одного приложения — конкуренты по значимым словам
+    var words = phrase.toLowerCase().split(/\s+/).filter(function(w){ return w && !C.STOPWORDS.has(w); });
+    if (words.length) q = words.join(" ");
+  }
+  $("q").value = q;
+  state.sort = [{field: "rating_count", dir: "desc"}];
+  applySortFromState();
+  runFilter();
+  $("demand").scrollTop = 0;
+}
+function backToIdeas(){
+  var b = BACK; BACK = null;
+  $("q").value = ""; state.nx = "";
+  if (b){ state.sort = b.sort; IDEAS_N = b.n; applySortFromState(); }
+  runFilter();
+  if (b) $("demand").scrollTop = b.top;
+}
+function renderDemand(){
+  var el = $("demand");
+  if (!ROWS.length || NIDX == null){ el.hidden = true; return; }
+  var m = curMarket(), e = NIDX[m], help = '<button type="button" class="helpb" title="Как искать идеи">?</button>';
+  var head = '<div class="dmh">' + (PQ.empty ? "" : '<button type="button" id="dmBack" title="Очистить поиск и вернуться к списку идей">← к идеям</button>') +
+    '<b>' + (PQ.empty ? "Идеи" : "Спрос") + '</b>';
+  el.hidden = false;
+  if (!e){
+    var have = Object.keys(NIDX);
+    el.innerHTML = head + '<span class="dim">' + (NIDX_ERR ? "Данные о спросе не загрузились: " + NIDX_ERR
+      : "Для рынка " + esc(mlabel(m)) + " данных о спросе нет." + (have.length ? " Есть для:" : "")) + '</span>' +
+      have.map(function(x){ return '<button type="button" class="chip" data-mk="' + esc(x) + '" title="' + esc(mlabel(x)) + '">' + esc(x) + '</button>'; }).join("") +
+      '<span class="spacer"></span>' + help + '</div>';
+    return;
+  }
+  var c = nicheData(m);
+  if (!c.data){
+    el.innerHTML = head + '<span class="dim">' + (c.err ? "Спрос по рынку не загрузился: " + c.err : "Загрузка данных о спросе (" + esc(m) + ")…") + '</span><span class="spacer"></span>' + help + '</div>';
+    return;
+  }
+  var D = c.data, col = demandCollapsed(), body = PQ.empty ? ideasHtml(D) : queryDemandHtml(D);
+  el.innerHTML = head + body.head + '<span class="spacer"></span><span class="dim" title="Google Keyword Planner, язык ключей — ' + esc(D.lang) + '">спрос на ' + esc(D.fetched) + ' · ' + esc(D.lang) + '</span>' +
+    help + '<button type="button" class="lnkb" id="dmToggle">' + (col ? "развернуть ▾" : "свернуть ▴") + '</button></div>' +
+    (col ? "" : body.html);
+}
+$("demand").addEventListener("click", function(e){
+  var t = e.target.closest("button,tr[data-q]");
+  if (!t) return;
+  if (t.dataset.mk){ state.market = t.dataset.mk; applyMarket(); return; }
+  if (t.dataset.np){ state.np = t.dataset.np; IDEAS_N = 12; writeHash(); renderDemand(); return; }
+  if (t.dataset.q){ openNiche(t.dataset.q); return; }
+  if (t.id === "dmBack"){ backToIdeas(); return; }
+  if (t.dataset.kx !== undefined){
+    var nx = new Set(state.nx ? state.nx.split("|") : []);
+    if (nx.has(t.dataset.kx)) nx.delete(t.dataset.kx); else nx.add(t.dataset.kx);
+    state.nx = Array.from(nx).join("|"); writeHash(); renderDemand(); return;
+  }
+  if (t.id === "dmMore"){ IDEAS_N += 24; renderDemand(); return; }
+  if (t.id === "dmAll"){ NEXP = true; renderDemand(); return; }
+  if (t.id === "dmNxClear"){ state.nx = ""; writeHash(); renderDemand(); return; }
+  if (t.id === "dmToggle"){ try { localStorage.setItem(DEM_KEY, demandCollapsed() ? "0" : "1"); } catch (x){} renderDemand(); return; }
+  if (t.classList.contains("helpb")) openHelp();
+});
+/* ---------- справка ---------- */
+function openHelp(){
+  var m = curMarket(), rows = [["Каталог и цены", lastCollected() || "—"]];
+  if (MD && MD.collectedAt) rows.push(["Цены " + m, MD.collectedAt.slice(0, 10)]);
+  if (NIDX) Object.keys(NIDX).forEach(function(k){ rows.push(["Спрос " + k + (k === m ? " (текущий)" : ""), NIDX[k].fetched + " · " + NIDX[k].lang + " · ключей " + fmtInt.format(NIDX[k].keywords)]); });
+  $("helpDates").innerHTML = rows.map(function(r){ return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("");
+  var d = $("helpDlg"); if (d.showModal) d.showModal(); else d.setAttribute("open", "");
+}
+function closeHelp(){ var d = $("helpDlg"); if (d.close) d.close(); else d.removeAttribute("open"); }
+$("ideasHelp").addEventListener("click", openHelp);
+document.querySelectorAll(".helpClose").forEach(function(b){ b.addEventListener("click", closeHelp); });
+$("helpExample2").addEventListener("click", function(){ runExample({market: "US", q: "", np: "green"}); });
+$("helpExample").addEventListener("click", function(){ runExample({market: "US", q: '"always on top"', sort: [{field: "rating_count", dir: "desc"}]}); });
+function runExample(st){
+  closeHelp();
+  BACK = null;
+  state = Object.assign(C.hashToState(""), {cols: state.cols, sort: state.sort}, st);
+  try { localStorage.setItem(DEM_KEY, "0"); } catch (x){}
+  stateToForm();
+  applyMarket();
+  var el = $("demand"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
 /* ---------- загрузка ---------- */
 function setProgress(frac){ $("progress").style.display = frac == null ? "none" : "block"; $("progress").firstChild.style.width = Math.round((frac || 0) * 100) + "%"; }
 function showEmpty(title, body, isErr){
@@ -1316,6 +1756,7 @@ if (location.protocol === "file:" && !STATIC){
 } else {
   refreshMarkets();
   loadApps();
+  loadNicheIndex();
   if (!STATIC) setInterval(refreshMarkets, 60000);   // на статике набор рынков не меняется
 }
 window.__viewer = {getTable: function(){ return table; }, getState: function(){ return state; }, openDetail: openDetail, refreshMarkets: refreshMarkets,

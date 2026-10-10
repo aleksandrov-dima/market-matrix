@@ -1,0 +1,52 @@
+{
+ "BR": {
+  "lang": "pt",
+  "fetched": "2026-10-09",
+  "keywords": 22631
+ },
+ "DE": {
+  "lang": "de",
+  "fetched": "2026-10-09",
+  "keywords": 14907
+ },
+ "FR": {
+  "lang": "fr",
+  "fetched": "2026-10-09",
+  "keywords": 19812
+ },
+ "GB": {
+  "lang": "en",
+  "fetched": "2026-10-09",
+  "keywords": 8
+ },
+ "IN": {
+  "lang": "hi",
+  "fetched": "2026-10-09",
+  "keywords": 873
+ },
+ "JP": {
+  "lang": "ja",
+  "fetched": "2026-10-09",
+  "keywords": 12649
+ },
+ "MX": {
+  "lang": "es",
+  "fetched": "2026-10-09",
+  "keywords": 14840
+ },
+ "SA": {
+  "lang": "ar",
+  "fetched": "2026-10-09",
+  "keywords": 3200
+ },
+ "TW": {
+  "lang": "zh-tw",
+  "fetched": "2026-10-09",
+  "keywords": 2117
+ },
+ "US": {
+  "lang": "en",
+  "fetched": "2026-10-09",
+  "keywords": 104466
+ }
+}
